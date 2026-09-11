@@ -19,9 +19,9 @@
   --line:#CFD3D8;
   --line-strong:#AEB4BC;
 
-  --p25:#C8102E;  /* 25kg 빨강 — 스쿼트 */
-  --p20:#0B4EA2;  /* 20kg 파랑 — 벤치 */
-  --p15:#E1A800;  /* 15kg 노랑 — 데드리프트 */
+  --p25:#C8102E;  /* 25kg 빨강. 스쿼트 */
+  --p20:#0B4EA2;  /* 20kg 파랑. 벤치 */
+  --p15:#E1A800;  /* 15kg 노랑. 데드리프트 */
   --p10:#237A4B;
   --p5:#9AA1A9;
   --p2:#2B3038;
@@ -388,7 +388,7 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
   *{transition:none!important;animation:none!important}
 }
 </style>
-</head>
+<meta name="description" content="3대 500을 향한 훈련 기록. 오늘 운동, 동작 가이드, 웜업, 1RM 점검을 한곳에서."><link rel="stylesheet" href="app.css"></head>
 <body>
 
 <div class="wrap">
@@ -419,15 +419,15 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
       </div>
     </div>
 
-    <div class="inputs">
-      <div class="hdr">현재 1RM</div>
-      <div class="irow"><span class="chipdot sq"></span><label for="iSq">스쿼트</label><input id="iSq" type="number" step="2.5" min="0" max="400" value="130" inputmode="decimal"></div>
-      <div class="irow"><span class="chipdot bp"></span><label for="iBp">벤치</label><input id="iBp" type="number" step="2.5" min="0" max="400" value="100" inputmode="decimal"></div>
-      <div class="irow"><span class="chipdot dl"></span><label for="iDl">데드리프트</label><input id="iDl" type="number" step="2.5" min="0" max="400" value="160" inputmode="decimal"></div>
+    <details class="record-settings"><summary>기록 수정 <span>1RM · 체중</span></summary><div class="inputs">
+      <div class="hdr">계산 기준 1RM · kg</div>
+      <div class="irow"><span class="chipdot sq"></span><label for="iSq">스쿼트</label><input id="iSq" type="number" step="0.1" min="20" max="500" value="130" inputmode="decimal"></div>
+      <div class="irow"><span class="chipdot bp"></span><label for="iBp">벤치</label><input id="iBp" type="number" step="0.1" min="20" max="500" value="100" inputmode="decimal"></div>
+      <div class="irow"><span class="chipdot dl"></span><label for="iDl">데드리프트</label><input id="iDl" type="number" step="0.1" min="20" max="500" value="160" inputmode="decimal"></div>
       <div class="irow"><span class="chipdot" style="background:var(--line-strong)"></span><label for="iBw">체중</label><input id="iBw" type="number" step="0.5" min="30" max="200" value="76" inputmode="decimal"></div>
     </div>
 
-    <div class="railfoot">Koreandaniel</div>
+    </details><div class="railfoot">Koreandaniel</div>
   </aside>
 
   <main>
@@ -440,39 +440,17 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
     <div class="pane" id="pane-plan" role="tabpanel" aria-labelledby="tabPlan">
 
     <header>
-      <h1>2년,<br>그리고 <span id="hGap">110</span>kg.</h1>
-      <p class="lede">체중 <strong>76kg</strong>에 스쿼트 <strong>130kg</strong>, 벤치 <strong>100kg</strong>. 무게가 쉽게 붙던 구간은 이미 지났습니다. 남은 변수는 데드리프트 하나 — 추정치 <strong>160kg</strong>, 그러면 현재 합계는 <strong>390</strong>입니다. 이 페이지는 거기서 500까지 가는 경로이고, <strong>벤치가 당신의 최고 종목이고 스쿼트에 여유가 가장 많다</strong>는 사실 위에 설계했습니다.</p>
+      <h1>500까지,<br>남은 <span id="hGap">110</span>kg.</h1>
+      <p class="lede">현재 기록에서 목표까지. 24개월 로드맵은 계획 시나리오이며, 실제 훈련 중량은 입력한 기록과 컨디션을 기준으로 조정합니다.</p><div id="history"></div>
     </header>
 
     <!-- 기준선 -->
-    <section class="sec">
-      <div class="eyebrow">기준선 · 빠진 숫자 하나</div>
-      <h2>데드리프트는 거의 확실히 160입니다.</h2>
-      <div class="body">
-        <p>두 개의 비율이 답을 줍니다. 스쿼트는 <strong>체중의 1.71배</strong> — 견고한 중급 구간입니다. 벤치는 <strong>체중의 1.32배</strong>로, 비율상 더 강한 종목입니다. 벤치 대 스쿼트 비율이 <strong>0.77</strong>인데, 보통은 0.65~0.72 사이에 들어옵니다.</p>
-        <p>이렇게 프레스 쪽으로 치우친 비율은 거의 항상 팔다리가 짧고 몸통이 두꺼운 체형에서 나옵니다. 이런 리프터는 데드를 잘 당기긴 하지만 스쿼트 대비 압도적이진 않습니다 — 팔이 긴 리프터가 보이는 1.3배 이상이 아니라 <strong>스쿼트의 1.15~1.25배</strong> 구간입니다. 130kg 스쿼트에 대입하면 150~163kg. 데드리프트가 전용 훈련에 빠르게 반응한다는 점을 조금 얹으면, 현실적인 구간은 <strong>152~170</strong>입니다.</p>
-      </div>
-
-      <div class="band">
-        <div class="bandbar">
-          <div class="bandfill" style="left:20%;right:20%"></div>
-          <div class="bandmark" style="left:calc(50% - 1.5px)"></div>
-        </div>
-        <div class="bandlabels"><span>140</span><span>152</span><span>160</span><span>170</span><span>180</span></div>
-        <div class="bandnote">기준값: <em>160 kg</em> — 체중의 2.11배</div>
-      </div>
-
-      <div class="panel mt">
-        <h3>첫 주에 직접 확인하세요</h3>
-        <p class="body">1RM을 치지 마세요. 웜업 후 <strong>한 번 더 할 수 있었다 싶은 지점에서 멈추는 무거운 3회</strong>를 올리고 거기서 끝냅니다. 그다음 에플리 공식을 씁니다. <span class="dim">1RM ≈ 무게 × (1 + 3 ÷ 30)</span> — 140×3이면 154, 145×3이면 160, 150×3이면 165입니다. 결과를 <strong>현재 1RM</strong> 칸에 입력하면 이 페이지의 모든 숫자가 다시 계산됩니다.</p>
-      </div>
-    </section>
-
-    <!-- 목표 -->
+<section class="sec"><h2>출발점부터 정확하게.</h2><p class="body">초기 데드리프트 160kg은 측정 전 임시값입니다. 종목 간 비율로 체형이나 실제 최대 중량을 판단하지 않습니다. 주간 실행의 1RM 점검에서 측정 방식과 날짜를 함께 기록하세요.</p><button class="ghost" data-action="assessment">1RM 점검하기</button></section>
+<!-- 목표 -->
     <section class="sec">
       <div class="eyebrow">목표 · 500의 구성</div>
       <h2>배분은 균등하지 않고, 균등해서도 안 됩니다.</h2>
-      <p class="body">벤치는 가장 느리게 오르고 이미 당신의 최고 종목이라, 상승분을 가장 적게 가져갑니다. 스쿼트가 가장 많이 짊어집니다 — 76kg 리프터가 현실적으로 도달할 수 있는 지점에서 가장 멀리 떨어져 있고, 올라가면서 데드리프트까지 같이 끌어올리기 때문입니다.</p>
+      <p class="body">스쿼트 180kg, 벤치 120kg, 데드리프트 200kg은 합계 500을 만드는 예시 배분입니다. 특정 종목의 성장 속도를 보장하지 않으며, 실제 기록에 맞춰 계획을 검토하세요.</p>
 
       <div class="ledgerwrap mt">
         <table id="ledger">
@@ -482,31 +460,25 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
           <tbody id="ledgerBody"></tbody>
         </table>
       </div>
-      <p class="body mt" style="font-size:14.5px;max-width:none">체중도 같이 올라갑니다. 76kg으로 500을 치는 것도 가능하지만 잔인합니다. <strong>83~84kg</strong>에서는 같은 합계가 평범한 상급 중급자 숫자가 됩니다. <strong>24개월에 +8kg</strong> — 한 달에 약 330g, 대부분이 근육으로 붙을 만큼 느린 속도입니다.</p>
+      <p class="body mt" style="font-size:14.5px;max-width:none">목표 체중 84kg은 원래 로드맵의 가정입니다. 체중 증가는 필수 조건이 아니며, 체중 변화만으로 근육 증가량을 판단할 수 없습니다.</p>
     </section>
 
     <!-- 24개월 -->
     <section class="sec">
       <div class="eyebrow">24개월 · 4개 페이즈</div>
       <h2>6개월짜리 블록 네 개.</h2>
-      <p class="body">각 페이즈에는 하나의 목적과 하나의 정직한 체크포인트가 있습니다. 올라갈수록 증가폭은 줄어듭니다. 줄어들 수밖에 없습니다.</p>
+      <p class="body">아래 숫자는 목표 시나리오입니다. 달력이 진행되어도 계산 기준 1RM은 자동으로 늘어나지 않습니다.</p>
 
       <div class="chart mt" id="chart"></div>
       <div class="axisnote">세로 축은 350kg부터 시작</div>
 
-      <div class="phaselist">
-        <div class="phase"><div class="pk">페이즈 1<br>1~6개월<br>390 → 425</div><p><b>기반.</b> 주 4회 고강도 세션을 한 주도 빠짐없이. 스쿼트가 첫 슬롯과 가장 많은 볼륨을 가져갑니다. 35kg 중 대부분은 데드리프트를 처음으로 제대로 훈련하는 것과 스쿼트 빈도를 늘리는 데서 나옵니다. 체중 76 → 79.</p></div>
-        <div class="phase"><div class="pk">페이즈 2<br>7~12개월<br>425 → 455</div><p><b>축적.</b> 다섯 번째 세션을 순수 근비대용으로 추가합니다 — 하체, 등, 삼두. 데드리프트는 톱세트 / 백오프 방식으로 바꿔서 회복을 태우지 않고 강도를 올립니다. 첫 벤치 정체는 보통 여기서 옵니다. 더 무겁게 치지 말고 포즈 훈련과 볼륨으로 깨세요. 체중 79 → 81.</p></div>
-        <div class="phase"><div class="pk">페이즈 3<br>13~18개월<br>455 → 480</div><p><b>정체 구간.</b> 증가폭이 절반으로 줄어듭니다. 이제 무게는 바에 더 얹어서가 아니라 약점에서 나옵니다 — 스티킹 포인트 훈련, 템포 스쿼트, 데피싯 데드, 그리고 새는 힘이 없도록 자세를 정리하는 것. 합계가 한 블록 내내 5kg만 움직이는 시기가 한 번은 옵니다. 정상입니다. 체중 81 → 83.</p></div>
-        <div class="phase"><div class="pk">페이즈 4<br>19~24개월<br>480 → 500</div><p><b>피킹.</b> 피킹 블록 두 번, 시도 두 번. 볼륨을 낮추고 90~95% 싱글을 넣고, 오프너·세컨드·서드를 시합처럼 치는 법을 익힙니다. 첫 시도가 492에서 멈추면 8주 물러섰다가 다시 갑니다. 체중은 84 언저리에서 안정.</p></div>
-      </div>
-    </section>
+      <details class="plan-detail"><summary>페이즈별 훈련 방향</summary><p>1~6개월: 기본 동작과 훈련 습관. 7~12개월: 기록을 보고 볼륨 조정. 13~18개월: 정체 원인과 약점 검토. 19~24개월: 준비가 된 경우 목표 시도 계획. 기간은 개인별로 달라집니다.</p></details></section>
 
     <!-- 주간 -->
     <section class="sec">
       <div class="eyebrow">주간 · 페이즈 1 템플릿</div>
       <h2>주 4일. 모든 종목을 주 2회.</h2>
-      <p class="body">종목당 무거운 노출 한 번, 가볍고 빠른 노출 한 번. 이 빈도가 계속 무게를 올리는 중급자와 지금 합계에서 멈추는 중급자를 가릅니다.</p>
+      <p class="body">종목당 무거운 노출 한 번, 가볍고 빠른 노출 한 번. 실제 회복 상태와 운동 기록에 맞춰 조정하는 기본 템플릿입니다.</p>
 
       <div class="week mt">
         <div class="day">
@@ -565,7 +537,7 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
 
       <div class="panel mt">
         <h3>그리고 다시 돌립니다</h3>
-        <p class="body">4주차가 끝나면 계산 기준이 되는 1RM 값을 올리고 블록을 다시 돌립니다 — 페이즈 1~2에서는 <strong>스쿼트 +2.5kg, 데드리프트 +2.5kg, 벤치 +1.25kg</strong>, 페이즈 3~4에서는 그 절반. 블록 여섯 번이 대략 한 페이즈입니다. 3주차가 정해진 횟수에서 <strong>두 번 연속 멈추면</strong> 그 종목은 추정치를 넘어선 겁니다. 무게를 더하지 말고 무거운 3회로 재측정하세요.</p>
+        <p class="body">4주차에는 모든 메인 운동을 55%로 2 × 5, 보조 운동은 2세트로 줄이는 회복 템플릿을 사용합니다. 다음 블록의 기준 중량은 자동 증가하지 않습니다. 세트 기록과 1RM 점검 결과를 보고 직접 갱신하세요.</p>
       </div>
     </section>
 
@@ -578,7 +550,7 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
         <div class="rule"><h3>바 속도가 계기판</h3><p>1주차와 2주차 세트가 빠르게 안 움직이면 그 주에 맞는 무게가 아닙니다. 볼륨 주차는 쉬워야 정상입니다. 버티지 말고 5% 빼세요.</p></div>
         <div class="rule"><h3>RPE 9에서 자릅니다</h3><p>재측정이 아니라면 진짜 실패 세트는 필요 없습니다. 가장 무거운 세트에서도 1회는 남기세요. 무게는 영웅적인 한 세션이 아니라 반복 가능한 한 주에서 나옵니다.</p></div>
         <div class="rule"><h3>디로드는 신호에 맞춰</h3><p>목표 횟수를 두 주 연속 놓치거나 수면이 6시간 미만으로 나흘 이어지면, 한 주를 55%로 떨어뜨립니다. 일찍 하면 한 주를 쓰고, 늦게 하면 여섯 주를 씁니다.</p></div>
-        <div class="rule"><h3>재측정은 하되 맥스는 치지 않기</h3><p>테스트는 페이즈당 한 번, 마지막에. 무거운 3회 + 에플리면 실제 1RM에서 2~3kg 안으로 들어오고, 진짜 싱글보다 회복 비용이 훨씬 적습니다. 진짜 싱글은 페이즈 4를 위해 아껴두세요.</p></div>
+        <div class="rule"><h3>재측정은 하되 맥스는 치지 않기</h3><p>이 앱은 마지막 측정 후 8주마다 기록 점검을 제안합니다. 이는 앱의 기본 일정이며 필수 검사 주기가 아닙니다. 3~5회 기록의 추정치와 실제 1회 최대 기록을 구분하고, 피로하거나 자세가 불안정하면 연기하세요.</p></div>
         <div class="rule"><h3>모든 세트를 기록</h3><p>무게, 횟수, 그리고 1~10 체감 점수. 2년은 기억이 쓸모없어지기에 충분히 긴 시간입니다. 정체가 피로 때문인지 진짜 천장인지 알려주는 건 기록뿐입니다.</p></div>
       </div>
     </section>
@@ -586,7 +558,7 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
     <!-- 보조 -->
     <section class="sec">
       <div class="eyebrow">보조 · 식사 &amp; 회복</div>
-      <h2>76킬로로 평생 버틸 수는 없습니다.</h2>
+      <h2>식사와 회복도 함께 기록하세요.</h2>
       <div class="twocol mt">
         <div>
           <h3>하루 목표</h3>
@@ -599,15 +571,15 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
         </div>
         <div>
           <h3>유지하는 법</h3>
-          <p class="body" style="font-size:14.5px;max-width:none">매일 아침 체중을 재고 일주일 평균을 봅니다. 7일 평균이 3주 동안 안 움직이면 150 kcal을 더합니다. 한 달에 0.5kg보다 빠르게 오르면 150 kcal을 뺍니다 — 초과분은 지방이고, 지방은 무게를 들어주지 않습니다.</p>
-          <p class="body" style="font-size:14.5px;max-width:none">크레아틴 하루 5g, 로딩 없이 사이클 없이. 카페인은 고강도 날에만 써야 정작 필요할 때 듣습니다. 나머지는 전부 선택입니다.</p>
+          <p class="body" style="font-size:14.5px;max-width:none">매일 아침 체중을 재고 일주일 평균을 봅니다. 7일 평균이 3주 동안 안 움직이면 150 kcal을 더합니다. 한 달에 0.5kg보다 빠르게 오르면 150 kcal을 뺍니다. 체중 변화의 구성을 숫자 하나로 판단할 수는 없습니다.</p>
+          <p class="body" style="font-size:14.5px;max-width:none">크레아틴 하루 5g, 로딩 없이 사이클 없이. 카페인은 개인의 반응과 수면에 미치는 영향을 살펴 사용하세요. 나머지는 전부 선택입니다.</p>
         </div>
       </div>
     </section>
 
     </div>
 
-    <div class="pane" id="pane-week" role="tabpanel" aria-labelledby="tabWeek" hidden>
+    <div class="pane" id="pane-week" role="tabpanel" aria-labelledby="tabWeek" hidden><section id="today" aria-label="오늘의 훈련"></section><section id="assessment" class="assessment" aria-label="1RM 재측정"></section>
 
       <div class="wknav">
         <button class="navbtn" id="wPrev" aria-label="이전 주">&#8592;</button>
@@ -619,14 +591,14 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
         <button class="navbtn" id="wNext" aria-label="다음 주">&#8594;</button>
       </div>
 
-      <div class="wkstart">
+      <details class="schedule-settings"><summary>프로그램 일정 설정</summary><div class="wkstart">
         <label for="wStart">프로그램 시작일 (월요일)</label>
         <input type="date" id="wStart">
         <button class="ghost" id="wToday">이번 주로</button>
         <button class="ghost" id="wJump1">1주차로</button>
       </div>
 
-      <div class="banner" id="wBanner" hidden></div>
+      </details><div class="banner" id="wBanner" hidden></div>
 
       <section class="sec">
         <div class="eyebrow">이번 주 메인 무게</div>
@@ -650,7 +622,7 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
 
     </div>
 
-    <footer>
+    <p id="save-status" class="save-status" role="status">기록은 이 기기의 브라우저에 저장됩니다.</p><footer>
       <span>일반적인 훈련 가이드이며 의학적 조언이 아닙니다. 피로가 아닌 방식으로 아프면 다음 블록 전에 진료를 받으세요.</span>
       <span class="sig">Koreandaniel · 2026</span>
     </footer>
@@ -658,428 +630,6 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
   </main>
 </div>
 
-<script>
-(function(){
-  var KEY = 'bigthree500.v1';
-
-  var LIFTS = [
-    {k:'sq', name:'스쿼트',    target:180, def:130},
-    {k:'bp', name:'벤치',      target:120, def:100},
-    {k:'dl', name:'데드리프트', target:200, def:160}
-  ];
-
-  var PHASES = [
-    {lab:'페이즈 1', sub:'1~6개월 · 79kg',   sq:145,   bp:107.5, dl:172.5, bw:79},
-    {lab:'페이즈 2', sub:'7~12개월 · 81kg',  sq:157.5, bp:112.5, dl:185,   bw:81},
-    {lab:'페이즈 3', sub:'13~18개월 · 83kg', sq:167.5, bp:115,   dl:197.5, bw:83},
-    {lab:'페이즈 4', sub:'19~24개월 · 84kg', sq:180,   bp:120,   dl:200,   bw:84}
-  ];
-
-  var WAVE = [
-    {wk:'1주차', scheme:'5 × 5', pct:0.70,  note:'빠르고 가볍게. 마지막 세트에 3회는 남아야 합니다. 안 남으면 추정치가 높은 겁니다.'},
-    {wk:'2주차', scheme:'5 × 4', pct:0.775, note:'바 속도는 그대로, 무게만 올립니다. RPE 7. 아직 버티는 렙은 없습니다.'},
-    {wk:'3주차', scheme:'4 × 3', pct:0.85,  note:'RPE 8. 마지막 세트가 정직한 세트입니다. 블록이 먹혔는지 알려주는 주차.'},
-    {wk:'4주차', scheme:'2 × 2', pct:0.90,  note:'주 초반에 무거운 2회, 나머지는 55%로 2 × 5. 회복하세요.'}
-  ];
-
-  var SIZES = [25,20,15,10,5,2.5,1.25];
-  var $ = function(id){ return document.getElementById(id); };
-  var inputs = {sq:$('iSq'), bp:$('iBp'), dl:$('iDl'), bw:$('iBw')};
-
-  function r25(x){ return Math.round(x/2.5)*2.5; }
-  function fmt(x){ return (Math.round(x*100)/100).toString(); }
-
-  function plates(total){
-    var per = (total - 20)/2, out = [];
-    if (per <= 0) return out;
-    for (var i=0;i<SIZES.length;i++){
-      while (per >= SIZES[i] - 1e-6){ out.push(SIZES[i]); per = Math.round((per-SIZES[i])*100)/100; }
-    }
-    return out;
-  }
-  function plateHTML(total){
-    var p = plates(total);
-    if (!p.length) return '<span class="pct">바만</span>';
-    var s = '';
-    for (var i=0;i<p.length;i++) s += '<i data-p="'+p[i]+'">'+p[i]+'</i>';
-    return s;
-  }
-
-  function read(){
-    var v = {};
-    ['sq','bp','dl','bw'].forEach(function(k){
-      var n = parseFloat(inputs[k].value);
-      if (!isFinite(n) || n <= 0) n = k==='bw' ? 76 : LIFTS.filter(function(l){return l.k===k;})[0].def;
-      v[k] = n;
-    });
-    return v;
-  }
-
-  function save(v){ try { localStorage.setItem(KEY, JSON.stringify(v)); } catch(e){} }
-  function restore(){
-    try {
-      var raw = localStorage.getItem(KEY);
-      if (!raw) return;
-      var v = JSON.parse(raw);
-      ['sq','bp','dl','bw'].forEach(function(k){
-        if (typeof v[k] === 'number' && isFinite(v[k]) && v[k] > 0) inputs[k].value = v[k];
-      });
-    } catch(e){}
-  }
-
-  function render(){
-    var v = read();
-    var total = v.sq + v.bp + v.dl;
-    var gap = Math.max(0, 500 - total);
-
-    $('rTotal').textContent = fmt(total);
-    $('rGap').textContent = gap > 0 ? fmt(gap) + ' kg' : '달성';
-    $('hGap').textContent = fmt(gap);
-
-    var scale = Math.max(500, total);
-    ['sq','bp','dl'].forEach(function(k){
-      $('m' + k.charAt(0).toUpperCase() + k.slice(1))
-        .style.setProperty('--p', (v[k]/scale*100) + '%');
-    });
-
-    var rows = '', tTot = 0;
-    LIFTS.forEach(function(l){
-      var now = v[l.k];
-      tTot += l.target;
-      rows += '<tr>'
-        + '<td><span class="liftname"><span class="chipdot '+l.k+'"></span>'+l.name+'</span></td>'
-        + '<td><span class="num">'+fmt(now)+'</span></td>'
-        + '<td><span class="num">'+l.target+'</span></td>'
-        + '<td><span class="delta">'+(l.target-now >= 0 ? '+' : '')+fmt(l.target-now)+'</span></td>'
-        + '<td><span class="dim">'+(now/v.bw).toFixed(2)+'배</span></td>'
-        + '<td><span class="dim">'+(l.target/84).toFixed(2)+'배</span></td>'
-        + '</tr>';
-    });
-    rows += '<tr class="sum">'
-      + '<td>합계</td>'
-      + '<td><span class="num">'+fmt(total)+'</span></td>'
-      + '<td><span class="num">'+tTot+'</span></td>'
-      + '<td><span class="delta">'+(tTot-total >= 0 ? '+' : '')+fmt(tTot-total)+'</span></td>'
-      + '<td><span class="dim">'+(total/v.bw).toFixed(2)+'배</span></td>'
-      + '<td><span class="dim">'+(tTot/84).toFixed(2)+'배</span></td>'
-      + '</tr>';
-    $('ledgerBody').innerHTML = rows;
-
-    var cols = [{lab:'현재', sub:'오늘 · '+fmt(v.bw)+'kg', sq:v.sq, bp:v.bp, dl:v.dl}].concat(PHASES);
-    var FLOOR = 350, TOP = 510, html = '';
-    cols.forEach(function(c){
-      var t = c.sq + c.bp + c.dl;
-      var frac = Math.max(0.04, Math.min(1, (t - FLOOR)/(TOP - FLOOR)));
-      var seg = function(cls, val){
-        return '<div class="seg '+cls+'" style="--p:'+(val/t*frac*100)+'%"></div>';
-      };
-      html += '<div class="col">'
-        + '<div class="coltot">'+fmt(t)+'</div>'
-        + '<div class="colbar">'+seg('sq',c.sq)+seg('bp',c.bp)+seg('dl',c.dl)+'</div>'
-        + '<div class="collab">'+c.lab+'</div>'
-        + '<div class="colsub">'+c.sub+'</div>'
-        + '<div class="colsplit">'
-          + '<span><i class="chipdot sq"></i>'+fmt(c.sq)+'</span>'
-          + '<span><i class="chipdot bp"></i>'+fmt(c.bp)+'</span>'
-          + '<span><i class="chipdot dl"></i>'+fmt(c.dl)+'</span>'
-        + '</div>'
-        + '</div>';
-    });
-    $('chart').innerHTML = html;
-
-    var w = '';
-    WAVE.forEach(function(row){
-      var cell = function(base){
-        var kg = r25(base * row.pct);
-        return '<td><div class="wavecell"><span class="num">'+fmt(kg)+'</span><span class="pl">'+plateHTML(kg)+'</span></div></td>';
-      };
-      w += '<tr>'
-        + '<td><span class="scheme">'+row.wk+'</span><br><span class="pct">'+Math.round(row.pct*1000)/10+'%</span></td>'
-        + '<td><span class="scheme">'+row.scheme+'</span></td>'
-        + cell(v.sq) + cell(v.bp) + cell(v.dl)
-        + '<td style="text-align:left"><span class="wknote">'+row.note+'</span></td>'
-        + '</tr>';
-    });
-    $('waveBody').innerHTML = w;
-
-    $('fProtein').textContent = Math.round(v.bw * 2) + ' g';
-    $('fCalHi').textContent = (Math.round(v.bw * 39 / 50) * 50).toLocaleString();
-    $('fCalLo').textContent = (Math.round(v.bw * 34.5 / 50) * 50).toLocaleString();
-
-    save(v);
-    renderWeek(v);
-  }
-
-
-  /* ─────────── 주간 실행 탭 ─────────── */
-  var TARGETS = {sq:180, bp:120, dl:200};
-  var TOTAL_WEEKS = 104, LAST_BLOCK = 25;   /* 블록 인덱스 0~25 = 26블록 = 104주 */
-  /* 페이즈 체크포인트에서의 종목별 진행률 (로드맵 탭의 숫자와 정확히 일치) */
-  var CP = [
-    {b:0,  sq:0,    bp:0,     dl:0},       /* 시작 */
-    {b:6,  sq:0.30, bp:0.375, dl:0.3125},  /* 26주차 · 6개월 · 425 */
-    {b:12, sq:0.55, bp:0.625, dl:0.625},   /* 52주차 · 12개월 · 455 */
-    {b:19, sq:0.75, bp:0.75,  dl:0.9375},  /* 78주차 · 18개월 · 480 */
-    {b:25, sq:1,    bp:1,     dl:1}        /* 104주차 · 24개월 · 500 */
-  ];
-  var DOW = ['월','화','수','목','금','토','일'];
-
-  var DAYS = [
-    {tag:'DAY 1', dow:0, name:'스쿼트 고강도', mc:'sq', ex:[
-      {n:'백스쿼트', main:'sq'},
-      {n:'벤치프레스', s:'4 × 6', pct:0.70, of:'bp'},
-      {n:'루마니안 데드리프트', s:'3 × 8', pct:0.50, of:'dl'},
-      {n:'중량 턱걸이', s:'4 × 6', note:'RPE 8'},
-      {n:'앱 롤아웃', s:'3 × 10', note:'천천히'}
-    ]},
-    {tag:'DAY 2', dow:1, name:'데드리프트 고강도', mc:'dl', ex:[
-      {n:'데드리프트', main:'dl'},
-      {n:'오버헤드 프레스', s:'4 × 6', pct:0.60, of:'bp'},
-      {n:'바벨 로우', s:'4 × 8', pct:0.50, of:'dl'},
-      {n:'레그컬', s:'3 × 12', note:'RPE 8'},
-      {n:'페이스풀', s:'3 × 15', note:'가볍게'}
-    ]},
-    {tag:'DAY 3', dow:3, name:'벤치 고강도', mc:'bp', ex:[
-      {n:'벤치프레스', main:'bp'},
-      {n:'포즈 스쿼트', s:'4 × 5', pct:0.65, of:'sq'},
-      {n:'클로즈그립 벤치', s:'3 × 8', pct:0.60, of:'bp'},
-      {n:'랫풀다운', s:'4 × 10', note:'RPE 8'},
-      {n:'삼두 + 후면 삼각근', s:'3 × 12', note:'RPE 8'}
-    ]},
-    {tag:'DAY 4', dow:5, name:'볼륨 & 약점', mc:null, ex:[
-      {n:'프론트 스쿼트', s:'4 × 5', pct:0.55, of:'sq'},
-      {n:'인클라인 / 스포토 프레스', s:'4 × 8', pct:0.55, of:'bp'},
-      {n:'데피싯 데드리프트', s:'4 × 4', pct:0.70, of:'dl'},
-      {n:'불가리안 스플릿 스쿼트', s:'3 × 10', note:'덤벨, RPE 8'},
-      {n:'컬, 케이블 로우, 복근', s:'3 × 12', note:'RPE 8'}
-    ]}
-  ];
-
-  var HABITS = [
-    {n:'훈련 세션', d:'훈련일만', trainOnly:true},
-    {n:'단백질 목표', d:function(v){ return Math.round(v.bw*2)+'g'; }},
-    {n:'아침 공복 체중 기록', d:''},
-    {n:'수면 7.5~8시간', d:''},
-    {n:'물 3~3.5L', d:''},
-    {n:'크레아틴 5g', d:''},
-    {n:'훈련 기록 (무게·횟수·체감)', d:'훈련일만', trainOnly:true}
-  ];
-
-  var wState = {week:1, start:null, checks:{}};
-  var WKEY = 'bigthree500.week.v1';
-
-  function wSave(){ try{ localStorage.setItem(WKEY, JSON.stringify(wState)); }catch(e){} }
-  function wRestore(){
-    try{
-      var v = JSON.parse(localStorage.getItem(WKEY) || 'null');
-      if (v && typeof v === 'object'){
-        if (v.week >= 1 && v.week <= TOTAL_WEEKS) wState.week = v.week;
-        if (typeof v.start === 'string') wState.start = v.start;
-        if (v.checks && typeof v.checks === 'object') wState.checks = v.checks;
-      }
-    }catch(e){}
-  }
-
-  function mondayOf(d){
-    var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    x.setDate(x.getDate() - ((x.getDay()+6) % 7));
-    return x;
-  }
-  function iso(d){
-    return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2);
-  }
-  function parseISO(t){
-    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t || '');
-    return m ? new Date(+m[1], +m[2]-1, +m[3]) : null;
-  }
-  function addDays(d, n){
-    var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    x.setDate(x.getDate()+n);
-    return x;
-  }
-  function md(d){ return (d.getMonth()+1) + '.' + d.getDate(); }
-
-  function frac(block, k){
-    if (block <= 0) return 0;
-    if (block >= LAST_BLOCK) return 1;
-    for (var i=0;i<CP.length-1;i++){
-      if (block >= CP[i].b && block <= CP[i+1].b){
-        var t = (block - CP[i].b) / (CP[i+1].b - CP[i].b);
-        return CP[i][k] + (CP[i+1][k] - CP[i][k]) * t;
-      }
-    }
-    return 1;
-  }
-  function tmFor(v, block){
-    var o = {};
-    ['sq','bp','dl'].forEach(function(k){
-      var target = Math.max(TARGETS[k], v[k]);
-      o[k] = Math.round((v[k] + (target - v[k]) * frac(block, k)) / 1.25) * 1.25;
-    });
-    return o;
-  }
-  function phaseOf(block){ return block <= 6 ? 1 : block <= 12 ? 2 : block <= 19 ? 3 : 4; }
-
-  function renderWeek(v){
-    var week = wState.week;
-    var block = Math.floor((week-1)/4);
-    var wib = ((week-1) % 4) + 1;
-    var row = WAVE[wib-1];
-    var tm = tmFor(v, block);
-    var phase = phaseOf(block);
-
-    $('wTitle').textContent = week + '주차';
-    $('wMeta').textContent = '페이즈 ' + phase + ' · 블록 ' + (block+1) + ' / ' + (LAST_BLOCK+1) + ' · 블록 내 ' + wib + '주차 · ' +
-      Math.ceil(week/(52/12)) + '개월차';
-
-    var start = parseISO($('wStart').value) || mondayOf(new Date());
-    var mon = addDays(start, (week-1)*7);
-    $('wDates').textContent = mon.getFullYear() + '. ' + md(mon) + ' – ' + md(addDays(mon,6));
-
-    /* 배너 */
-    var msg = '';
-    if (wib === 4) msg = '<b>디로드 주차.</b> 주 초반에 무거운 2회를 치고, 남은 세션은 55%로 2 × 5. 보조 운동도 세트 수를 2세트로 줄이세요. 이번 주가 끝나면 다음 블록의 무게가 자동으로 올라갑니다.';
-    else if (wib === 3) msg = '<b>강도 주차.</b> 마지막 세트가 정직한 세트입니다. 여기서 정해진 횟수를 두 블록 연속 놓치면 무게를 더하지 말고 무거운 3회로 재측정하세요.';
-    else if (week === 1) msg = '<b>첫 주.</b> 데드리프트는 추정치 위에 서 있습니다. 이번 주에 무거운 3회로 실제 값을 확인하고 <b>현재 1RM</b> 칸에 입력하세요.';
-    else if (phase >= 3 && wib === 1) msg = '<b>페이즈 ' + phase + '.</b> 증가폭이 절반으로 줄었습니다. 무게는 이제 바가 아니라 약점 보완과 자세에서 나옵니다.';
-    $('wBanner').innerHTML = msg;
-    $('wBanner').hidden = !msg;
-
-    /* 메인 무게 카드 */
-    var names = {sq:'스쿼트', bp:'벤치', dl:'데드리프트'};
-    var cards = '';
-    ['sq','bp','dl'].forEach(function(k){
-      var kg = r25(tm[k] * row.pct);
-      var back = wib === 4 ? r25(tm[k] * 0.55) : null;
-      cards += '<div class="lcard">'
-        + '<div class="top"><span class="chipdot '+k+'"></span>'+names[k]+'</div>'
-        + '<div class="sch">'+row.scheme+'</div>'
-        + '<div class="kg">'+fmt(kg)+'<em>kg</em></div>'
-        + '<span class="pl">'+plateHTML(kg)+'</span>'
-        + '<div class="sub">기준 1RM '+fmt(tm[k])+'kg의 '+(Math.round(row.pct*1000)/10)+'%</div>'
-        + (back ? '<div class="backoff">주 후반 백오프 2 × 5 · <b>'+fmt(back)+'kg</b></div>' : '')
-        + '</div>';
-    });
-    $('wLifts').innerHTML = cards;
-
-    /* 요일별 훈련 */
-    var days = '';
-    DAYS.forEach(function(d){
-      var date = addDays(mon, d.dow);
-      var rows = '';
-      d.ex.forEach(function(e){
-        var kg = '', cls = 'kgv', sch = e.s;
-        if (e.main){
-          kg = fmt(r25(tm[e.main] * row.pct)) + 'kg';
-          sch = row.scheme;
-        } else if (e.pct){
-          var w = r25(tm[e.of] * e.pct);
-          kg = fmt(wib === 4 ? r25(w * 0.85) : w) + 'kg';
-        } else {
-          kg = e.note; cls = 'kgv soft';
-        }
-        rows += '<div class="ex w3'+(e.main ? ' main' : '')+'"'+(e.main ? ' style="--mc:var(--p'+({sq:'25',bp:'20',dl:'15'}[e.main])+')"' : '')+'>'
-          + '<span class="n">'+e.n+'</span>'
-          + '<span class="s">'+sch+'</span>'
-          + '<span class="'+cls+'">'+kg+'</span>'
-          + '</div>';
-      });
-      days += '<div class="day">'
-        + '<div class="daytag">'+d.tag+' · '+DOW[d.dow]+'요일 · '+md(date)+'</div>'
-        + '<h3>'+d.name+'</h3>' + rows
-        + '</div>';
-    });
-    $('wDays').innerHTML = days;
-
-    /* 매일 체크리스트 */
-    var trainDows = DAYS.map(function(d){ return d.dow; });
-    var g = '<div class="dc hd lab" style="justify-content:flex-start"><b>'+week+'주차</b></div>';
-    for (var i=0;i<7;i++){
-      var dt = addDays(mon, i), isT = trainDows.indexOf(i) >= 0;
-      g += '<div class="dc hd'+(isT ? ' train' : '')+'"><b>'+DOW[i]+'</b><span>'+md(dt)+'</span></div>';
-    }
-    var wk = wState.checks[week] || {};
-    HABITS.forEach(function(h, hi){
-      var d = typeof h.d === 'function' ? h.d(v) : h.d;
-      g += '<div class="dc lab">'+h.n+(d ? '<small>'+d+'</small>' : '')+'</div>';
-      for (var i=0;i<7;i++){
-        var isT = trainDows.indexOf(i) >= 0;
-        if (h.trainOnly && !isT){ g += '<div class="dc off"><span class="dash">·</span></div>'; continue; }
-        var id = hi + '-' + i;
-        g += '<div class="dc'+(isT ? ' train' : '')+'">'
-          + '<input type="checkbox" data-k="'+id+'"'+(wk[id] ? ' checked' : '')
-          + ' aria-label="'+h.n+' '+DOW[i]+'요일"></div>';
-      }
-    });
-    $('wDaily').innerHTML = g;
-
-    $('wPrev').disabled = week <= 1;
-    $('wNext').disabled = week >= TOTAL_WEEKS;
-  }
-
-  function goWeek(n){
-    wState.week = Math.min(TOTAL_WEEKS, Math.max(1, n));
-    wSave();
-    renderWeek(read());
-    $('wTitle').scrollIntoView({block:'nearest'});
-  }
-
-  function initWeekTab(){
-    wRestore();
-    if (!wState.start){ wState.start = iso(mondayOf(new Date())); wSave(); }  /* 첫 방문에 시작일 고정 */
-    $('wStart').value = wState.start;
-
-    $('wPrev').addEventListener('click', function(){ goWeek(wState.week-1); });
-    $('wNext').addEventListener('click', function(){ goWeek(wState.week+1); });
-    $('wJump1').addEventListener('click', function(){ goWeek(1); });
-    $('wToday').addEventListener('click', function(){
-      var st = parseISO($('wStart').value) || mondayOf(new Date());
-      var diff = Math.floor((mondayOf(new Date()) - st) / 604800000);
-      goWeek(diff + 1);
-    });
-    $('wStart').addEventListener('change', function(){
-      wState.start = $('wStart').value; wSave(); renderWeek(read());
-    });
-    $('wDaily').addEventListener('change', function(e){
-      var el = e.target;
-      if (!el || el.type !== 'checkbox') return;
-      var wk = wState.checks[wState.week] || (wState.checks[wState.week] = {});
-      if (el.checked) wk[el.getAttribute('data-k')] = 1;
-      else delete wk[el.getAttribute('data-k')];
-      wSave();
-    });
-
-    var tabs = [{b:$('tabPlan'), p:$('pane-plan')}, {b:$('tabWeek'), p:$('pane-week')}];
-    function select(i){
-      tabs.forEach(function(t, j){
-        t.b.setAttribute('aria-selected', i === j ? 'true' : 'false');
-        t.p.hidden = i !== j;
-      });
-      try{ localStorage.setItem('bigthree500.tab', i); }catch(e){}
-    }
-    tabs.forEach(function(t, i){
-      t.b.addEventListener('click', function(){ select(i); });
-      t.b.addEventListener('keydown', function(e){
-        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
-          e.preventDefault();
-          var n = (i + (e.key === 'ArrowRight' ? 1 : tabs.length-1)) % tabs.length;
-          select(n); tabs[n].b.focus();
-        }
-      });
-    });
-    var saved = 0;
-    try{ saved = parseInt(localStorage.getItem('bigthree500.tab'), 10) || 0; }catch(e){}
-    select(saved === 1 ? 1 : 0);
-  }
-
-  restore();
-  initWeekTab();
-  ['sq','bp','dl','bw'].forEach(function(k){
-    inputs[k].addEventListener('input', render);
-    inputs[k].addEventListener('change', render);
-  });
-  render();
-})();
-</script>
-</body>
+<script src="core.js"></script><script src="guides.js"></script><script src="legacy.js"></script><script src="app.js"></script>
+<dialog id="guide-dialog" aria-labelledby="guide-title"><div id="guide-body"></div><form method="dialog"><button class="primary">닫기</button></form></dialog><div id="rest-timer" class="rest-timer" hidden></div></body>
 </html>
