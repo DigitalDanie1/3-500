@@ -810,6 +810,7 @@
     wState.week = Math.min(TOTAL_WEEKS, Math.max(1, n));
     wSave();
     renderWeek(read());
+    document.dispatchEvent(new CustomEvent('training:week'));
     $('wTitle').scrollIntoView({block:'nearest'});
   }
 
@@ -828,6 +829,7 @@
     });
     $('wStart').addEventListener('change', function(){
       wState.start = $('wStart').value; wSave(); renderWeek(read());
+      document.dispatchEvent(new CustomEvent('training:week'));
     });
     function epCalc(){
       var w = parseFloat($('epW').value), n = parseInt($('epR').value, 10);
