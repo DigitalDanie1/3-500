@@ -23,9 +23,17 @@
     return {date:target,days,overdue:days<0,unknown:!date(last)};
   }
   function prescription(e,wave,wib,v){
-    const scheme=e.main?wave.scheme:(wib===4?e.s.replace(/^\d+/,'2'):e.s);
-    const [sets,reps]=scheme.split('×').map(x=>Number(x.trim()));
-    let kg=e.main?round(v[e.main]*wave.pct):e.pct?round(round(v[e.of]*e.pct)*(wib===4?.85:1)):null;
+    const deload=wib===4?.85:1;
+    if(e.main){
+      const [s,r]=String(wave.scheme).split('×').map(x=>parseInt(x,10));
+      return {sets:s,reps:r,kg:round(v[e.main]*wave.pct)};
+    }
+    let sets,reps;
+    if(Array.isArray(e.sets)){ sets=e.sets[wib-1]; reps=e.reps; }
+    else { const [s,r]=String(e.s||'3 × 10').split('×').map(x=>parseInt(x,10)); sets=wib===4?2:s; reps=r; }
+    let kg=null;
+    if(e.pct) kg=round(round(v[e.of]*e.pct)*deload);
+    else if(Array.isArray(e.est)){ const base=e.est[0]==='bw'?v.bw:v[e.est[0]]; kg=round(round(base*e.est[1])*deload); }
     return {sets,reps,kg};
   }
   function plates(total,bar=20){
