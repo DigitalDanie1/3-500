@@ -42,6 +42,13 @@
     for(const n of [25,20,15,10,5,2.5,1.25]) while(remaining>=n-1e-6){ plates.push(n);remaining=Math.round((remaining-n)*1000)/1000; }
     return {plates,remainder:remaining};
   }
-  const api={iso,date,add,round,warmup,estimate,due,prescription,plates};
+  /* AMRAP 세트로 1RM 추정. 10회를 넘으면 Epley가 과대추정하므로 10회로 자르고,
+     기준값이 부풀지 않도록 2.5kg 단위로 내림한다. */
+  function amrap(kg,reps){
+    if(!Number.isFinite(kg)||kg<=0||!Number.isFinite(reps)||reps<1) return null;
+    const r=Math.min(Math.floor(reps),10);
+    return Math.floor(kg*(1+r/30)/2.5)*2.5;
+  }
+  const api={iso,date,add,round,warmup,estimate,due,prescription,plates,amrap};
   if(typeof module!=='undefined'&&module.exports) module.exports=api; else root.TrainingCore=api;
 })(typeof window!=='undefined'?window:globalThis);

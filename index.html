@@ -516,7 +516,11 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
 
 @media (max-width:940px){
   .wrap{grid-template-columns:1fr;gap:36px;padding-bottom:64px}
-  .rail{position:static;max-height:none;overflow:visible;padding-bottom:0;border-bottom:1px solid var(--line)}
+  .wrap{display:flex;flex-direction:column}
+  main{order:1;min-width:0;width:100%;max-width:100%}
+  .rail{min-width:0;width:100%}
+  .rail{order:2;position:static;max-height:none;overflow:visible;
+        padding-top:24px;padding-bottom:0;border-top:1px solid var(--line)}
   .meterbox{flex-direction:column-reverse;gap:14px;padding-left:0}
   .meter{width:100%;height:30px}
   .stack{flex-direction:row}
@@ -692,7 +696,7 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
           <button type="button" data-ex="백스쿼트" class="ex main" style="--mc:var(--p25)"><span class="n">백스쿼트</span><span class="s">블록 스킴</span></button>
           <button type="button" data-ex="루마니안 데드리프트" class="ex"><span class="n">루마니안 데드리프트</span><span class="s">3세트 × 8회 · 50%</span></button>
           </div>
-          <div class="tier hyp"><b>근비대</b><span>휴식 45~90초 · 마지막 세트 RPE 9~10</span></div>
+          <div class="tier hyp"><b>근비대</b><span>휴식 45~90초 · 마지막 세트 실패까지</span></div>
           <div class="exlist">
           <button type="button" data-ex="레그 프레스" class="ex"><span class="n">레그 프레스</span><span class="s">3~5세트 × 12회</span></button>
           <button type="button" data-ex="레그 익스텐션" class="ex"><span class="n">레그 익스텐션</span><span class="s">3~4세트 × 15회</span></button>
@@ -709,7 +713,7 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
           <button type="button" data-ex="벤치프레스" class="ex main" style="--mc:var(--p20)"><span class="n">벤치프레스</span><span class="s">블록 스킴</span></button>
           <button type="button" data-ex="인클라인 덤벨 프레스" class="ex"><span class="n">인클라인 덤벨 프레스</span><span class="s">4세트 × 8회</span></button>
           </div>
-          <div class="tier hyp"><b>근비대</b><span>휴식 45~90초 · 마지막 세트 RPE 9~10</span></div>
+          <div class="tier hyp"><b>근비대</b><span>휴식 45~90초 · 마지막 세트 실패까지</span></div>
           <div class="exlist">
           <button type="button" data-ex="머신 체스트 프레스" class="ex"><span class="n">머신 체스트 프레스<i class="tech">마지막 세트 드롭</i></span><span class="s">3~4세트 × 10회</span></button>
           <button type="button" data-ex="인클라인 케이블 플라이" class="ex"><span class="n">인클라인 케이블 플라이</span><span class="s">3~4세트 × 15회</span></button>
@@ -726,7 +730,7 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
           <button type="button" data-ex="데드리프트" class="ex main" style="--mc:var(--p15)"><span class="n">데드리프트</span><span class="s">블록 스킴</span></button>
           <button type="button" data-ex="바벨 로우" class="ex"><span class="n">바벨 로우</span><span class="s">4세트 × 8회 · 50%</span></button>
           </div>
-          <div class="tier hyp"><b>근비대</b><span>휴식 45~90초 · 마지막 세트 RPE 9~10</span></div>
+          <div class="tier hyp"><b>근비대</b><span>휴식 45~90초 · 마지막 세트 실패까지</span></div>
           <div class="exlist">
           <button type="button" data-ex="랫풀다운" class="ex"><span class="n">랫풀다운<i class="tech">마지막 세트 레스트-포즈</i></span><span class="s">3~4세트 × 12회</span></button>
           <button type="button" data-ex="체스트 서포티드 로우" class="ex"><span class="n">체스트 서포티드 로우</span><span class="s">3~4세트 × 12회</span></button>
@@ -744,7 +748,7 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
           <button type="button" data-ex="포즈 / 스포토 벤치" class="ex"><span class="n">포즈 / 스포토 벤치</span><span class="s">4세트 × 6회 · 65%</span></button>
           <button type="button" data-ex="오버헤드 프레스" class="ex"><span class="n">오버헤드 프레스</span><span class="s">4세트 × 6회 · 60%</span></button>
           </div>
-          <div class="tier hyp"><b>근비대</b><span>휴식 45~90초 · 마지막 세트 RPE 9~10</span></div>
+          <div class="tier hyp"><b>근비대</b><span>휴식 45~90초 · 마지막 세트 실패까지</span></div>
           <div class="exlist">
           <button type="button" data-ex="덤벨 숄더 프레스" class="ex"><span class="n">덤벨 숄더 프레스</span><span class="s">3~4세트 × 10회</span></button>
           <button type="button" data-ex="사이드 레터럴 레이즈" class="ex"><span class="n">사이드 레터럴 레이즈</span><span class="s">4~5세트 × 15회</span></button>
@@ -763,7 +767,7 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
           <button type="button" data-ex="프론트 스쿼트" class="ex"><span class="n">프론트 스쿼트</span><span class="s">4세트 × 5회 · 55%</span></button>
           <button type="button" data-ex="데피싯 데드리프트" class="ex"><span class="n">데피싯 데드리프트</span><span class="s">4세트 × 4회 · 60%</span></button>
           </div>
-          <div class="tier hyp"><b>근비대</b><span>휴식 45~90초 · 마지막 세트 RPE 9~10</span></div>
+          <div class="tier hyp"><b>근비대</b><span>휴식 45~90초 · 마지막 세트 실패까지</span></div>
           <div class="exlist">
           <button type="button" data-ex="불가리안 스플릿 스쿼트" class="ex"><span class="n">불가리안 스플릿 스쿼트</span><span class="s">3~4세트 × 10회</span></button>
           <button type="button" data-ex="힙 쓰러스트" class="ex"><span class="n">힙 쓰러스트</span><span class="s">3~4세트 × 12회</span></button>
@@ -974,7 +978,7 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
       <section class="sec">
         <div class="eyebrow">이번 주 메인 무게</div>
         <h2>바에 얹을 숫자.</h2>
-        <p class="body">무게는 <strong>네가 입력한 1RM × 이번 주 퍼센트</strong>, 이 하나뿐입니다. 퍼센트는 4주 블록 안에서만 움직이고(75 → 80 → 87.5%, 4주차는 60% 회복), 4주가 지나면 다시 75%로 돌아옵니다. <strong>기준 1RM은 달력으로 올라가지 않습니다</strong> — 측정 주차에 네가 실제로 재서 위 칸을 바꿀 때만 바뀝니다.</p>
+        <p class="body">무게는 <strong>네가 입력한 1RM × 이번 주 퍼센트</strong>, 이 하나뿐입니다. 퍼센트는 4주 블록 안에서만 움직이고(75 → 80 → 87.5%, 4주차는 60% 회복), 4주가 지나면 다시 75%로 돌아옵니다. 1~3주차 메인 종목 마지막 세트(<strong>+</strong>)는 <strong>AMRAP — 할 수 있는 만큼</strong>입니다. 그 기록으로 1RM이 계산되고, 지금보다 높으면 <strong>자동으로 올라갑니다.</strong> 멈추는 지점을 네가 정하지 않게 하는 장치입니다. <strong>기준 1RM은 달력으로 올라가지 않습니다</strong> — 측정 주차에 네가 실제로 재서 위 칸을 바꿀 때만 바뀝니다.</p>
         <div class="wave4 mt" id="wWave"></div>
         <div class="formula" id="wFormula"></div>
         <div class="liftcards mt" id="wLifts"></div>

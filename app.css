@@ -108,3 +108,23 @@ dialog .primary{width:100%;margin-top:20px}
 .wrap{display:block;padding:0 20px 96px}.rail{position:static;max-height:none;overflow:visible;display:grid;grid-template-columns:1fr auto;gap:10px;padding:20px 0 8px}.brandmark{font-size:30px}.brandsub{display:none}.meterbox{display:block;padding:0;text-align:right}.meter{display:none}.readout{display:flex;align-items:baseline;gap:6px}.readout .k{display:none}.readout .big{font-size:32px;line-height:1}.readout .big:after{content:' / 500';font-size:16px;color:var(--muted)}.readout .gap{display:none}.record-settings{grid-column:1/-1;border-top:1px solid var(--line)}.record-settings summary{padding:8px 0;font-size:13px}.record-settings .irow{margin:8px 0}.railfoot{display:none}.tabs{margin:0 0 16px;padding:0}.today-card{padding:20px}.today-card .lead-weight{font-size:52px}.today-top{font-size:13px}.assessment{margin-bottom:24px}.week{grid-template-columns:1fr}.rest-timer{left:12px;right:12px;bottom:12px;justify-content:space-between;gap:8px}.rest-timer output{font-size:24px;min-width:76px}.rest-timer button{font-size:13px}.record-settings[open] .inputs{max-width:none}.test-row{align-items:flex-start}.exercise-content{padding:12px}.exercise summary{padding:14px}.set-head,.set-row{gap:5px;grid-template-columns:24px 1fr .8fr .8fr 38px}.session-top label{width:100%}.session-top input{max-width:190px}.wknav{padding:12px 0}.test-row .ghost{white-space:nowrap}.wkstart{flex-wrap:wrap}header{padding-top:16px}header h1{font-size:40px}.day-picker button{font-size:13px}.test-form .form-grid{grid-template-columns:1fr 1fr}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* 오늘 강조 + 내일 미리보기 */
+.today-card.is-today{border-width:2px;border-color:var(--session-color);position:relative}
+.today-badge{display:inline-block;background:var(--session-color);color:#fff;font-family:var(--f-mono);
+  font-size:10px;letter-spacing:.14em;padding:5px 11px;border-radius:2px;margin-bottom:12px}
+.tomorrow{display:block;width:100%;text-align:left;appearance:none;cursor:pointer;
+  background:var(--surface-2);border:1px solid var(--line);border-left:3px solid var(--session-color);
+  border-radius:3px;padding:13px 16px;margin-top:12px;font:inherit;color:inherit}
+.tomorrow:hover{border-color:var(--session-color)}
+.tomorrow.rest{cursor:default;border-left-color:var(--line-strong)}
+.tomorrow-when{display:block;font-family:var(--f-mono);font-size:9.5px;letter-spacing:.12em;color:var(--faint)}
+.tomorrow-name{display:block;font-family:var(--f-disp);font-weight:700;font-size:19px;margin-top:4px}
+.tomorrow-detail{display:block;font-size:12.5px;color:var(--muted);margin-top:4px}
+.day-picker button[data-is-today]{border-color:var(--ink);font-weight:700}
+
+/* AMRAP — 마지막 세트는 끝까지 */
+.set-row.amrap{background:color-mix(in srgb,var(--p25) 9%,transparent);border-radius:3px}
+.amrap-tag{color:var(--p25);font-weight:800;margin-left:2px}
+.amrap-hint{font-size:12.5px;color:var(--muted);margin:6px 0 8px}
+.amrap-hint b{color:var(--p25);font-weight:800}
