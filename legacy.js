@@ -19,13 +19,13 @@
   /* 5/3/1 — 퍼센트는 1RM이 아니라 기준값(TM = 1RM × 90%) 대비.
      마지막 세트 '+'는 횟수 제한 없음(AMRAP). 4주차는 디로드. */
   var WAVE = [
-    {wk:'1주차', label:'5s',    scheme:'5 · 5 · 5+', sets:[[.65,5],[.75,5],[.85,5,'+']], amrap:true,
+    {wk:'1주차', label:'5s',    scheme:'5회 · 5회 · 최대한', sets:[[.65,5],[.75,5],[.85,5,'+']], amrap:true,
      note:'마지막 세트(5+)는 끝까지. 5회는 최소치이고, 목표는 그 이상입니다.'},
-    {wk:'2주차', label:'3s',    scheme:'3 · 3 · 3+', sets:[[.70,3],[.80,3],[.90,3,'+']], amrap:true,
+    {wk:'2주차', label:'3s',    scheme:'3회 · 3회 · 최대한', sets:[[.70,3],[.80,3],[.90,3,'+']], amrap:true,
      note:'마지막 세트(3+)는 끝까지. 여기서 8회 이상 나오면 1RM이 자동으로 올라갑니다.'},
-    {wk:'3주차', label:'5/3/1', scheme:'5 · 3 · 1+', sets:[[.75,5],[.85,3],[.95,1,'+']], amrap:true,
+    {wk:'3주차', label:'5/3/1', scheme:'5회 · 3회 · 최대한', sets:[[.75,5],[.85,3],[.95,1,'+']], amrap:true,
      note:'가장 무거운 주. 1+는 1회가 최소치입니다 — 자세가 버티는 데까지 계속 가세요.'},
-    {wk:'4주차', label:'디로드', scheme:'5 · 5 · 5',  sets:[[.40,5],[.50,5],[.60,5]],
+    {wk:'4주차', label:'디로드', scheme:'5회 · 5회 · 5회',  sets:[[.40,5],[.50,5],[.60,5]],
      note:'디로드. FSL 없음, 보조 운동도 2세트. 다음 주에 기준값이 올라갑니다.'}
   ];
   var INC = {sq:5, dl:5, bp:2.5, ohp:2.5};   /* 사이클마다 TM 증량 (5/3/1 표준) */
@@ -665,6 +665,14 @@
   }
   function phaseOf(block){ return block <= 6 ? 1 : block <= 12 ? 2 : block <= 19 ? 3 : 4; }
 
+  /* 세트를 한 줄씩 풀어서: 1세트 87.5kg 3회 / … / 3세트 112.5kg 최대한(최소 3회) */
+  function setList(plan){
+    return '<span class="setlist">' + plan.map(function(p, i){
+      return '<span class="set'+(p.plus ? ' max' : '')+'"><i>'+(i+1)+'세트</i><b>'+fmt(p.kg)+'kg</b>'
+        + '<span>'+(p.plus ? '최대한 <small>(최소 '+p.reps+'회)</small>' : p.reps+'회')+'</span></span>';
+    }).join('') + '</span>';
+  }
+
   function renderWeek(v){
     var week = wState.week;
     var block = Math.floor((week-1)/4);
@@ -684,9 +692,9 @@
     /* 배너 */
     var msg = '';
     if (wib === 4) msg = '<b>디로드.</b> 메인은 TM의 40 · 50 · 60%로 가볍게, FSL은 쉬고 보조 운동도 2세트. 다음 주에 기준값(TM)이 스쿼트·데드 +5kg, 벤치·OHP +2.5kg 올라갑니다.';
-    else if (wib === 3) msg = '<b>5/3/1 주.</b> 사이클에서 가장 무거운 주입니다. 마지막 세트 <b>1+</b>는 1회가 최소치일 뿐 — 자세가 버티는 데까지 계속 가세요.';
+    else if (wib === 3) msg = '<b>5/3/1 주.</b> 사이클에서 가장 무거운 주입니다. 마지막 세트는 1번만 들어도 되지만, <b>되는 만큼 계속 드세요.</b>';
     else if (wib === 1 && cyc > 1) msg = '<b>사이클 ' + cyc + ' 시작.</b> 기준값이 한 단계 올라갔습니다. 무게가 지난 사이클보다 높은 게 정상입니다.';
-    else msg = '<b>한계는 네가 정하지 않는다.</b> 메인 종목 마지막 세트(<b>+</b>)는 횟수 제한이 없습니다. 자세가 무너지기 직전까지 가고 실제 횟수를 기록하세요. 그 기록이 지금보다 높은 1RM을 가리키면 앱이 <b>자동으로 올립니다</b>.';
+    else msg = '<b>한계는 네가 정하지 않는다.</b> 메인 종목의 <b>마지막 세트는 &lsquo;최대한&rsquo;</b> — 정해진 횟수가 없어. 자세가 무너지기 직전까지 들고, 실제로 든 횟수를 적으면 돼. 그 기록이 지금보다 높은 1RM을 가리키면 앱이 <b>자동으로 올립니다</b>.';
     if (future) msg += ' <span style="color:var(--faint)">(미래 주차 — 사이클 증량만 반영한 예상치이고, 실제 기록에 따라 달라집니다.)</span>';
     $('wBanner').innerHTML = msg;
     $('wBanner').hidden = !msg;
@@ -724,11 +732,10 @@
       var fslN = wib === 4 ? 0 : ({sq:5,bp:5,dl:3,ohp:5}[k]);
       cards += '<div class="lcard">'
         + '<div class="top"><span class="chipdot '+k+'"'+(k==='ohp'?' style="background:var(--p10)"':'')+'></span>'+names[k]+' <span class="when" style="margin-left:auto">'+dayOf[k]+'요일</span></div>'
-        + '<div class="sch">'+plan.map(function(p){return fmt(p.kg)+'×'+p.reps+(p.plus?'+':'');}).join(' → ')+'</div>'
-        + '<div class="kg">'+fmt(top.kg)+'<em>kg × '+top.reps+(top.plus?'+':'')+'</em></div>'
-        + '<span class="pl">'+plateHTML(top.kg)+'</span>'
-        + (fslN ? '<div class="backoff">FSL · <b>'+fmt(plan[0].kg)+'kg</b> × 5회 × '+fslN+'세트</div>' : '')
-        + '<div class="sub">TM <b>'+fmt(tm[k])+'kg</b> × '+Math.round(row.sets[row.sets.length-1][0]*100)+'% · 1RM '+fmt(v[k])+'kg</div>'
+        + setList(plan)
+        + (fslN ? '<div class="backoff">그다음 <b>FSL</b> — 1세트 무게 <b>'+fmt(plan[0].kg)+'kg</b>로 다시 5회 × '+fslN+'세트</div>' : '<div class="backoff">디로드 — FSL 없음</div>')
+        + '<div class="sub">마지막 세트 원판(한쪽) <span class="pl" style="display:inline-flex;vertical-align:middle">'+plateHTML(top.kg)+'</span></div>'
+        + '<div class="sub">기준값 '+fmt(tm[k])+'kg (1RM '+fmt(v[k])+'kg의 90%)</div>'
         + '</div>';
     });
     $('wLifts').innerHTML = cards;
@@ -739,15 +746,17 @@
       var kg = '', cls = 'kgv', sch = '', sub = '';
       var ns = Array.isArray(e.sets) ? e.sets[wib-1] : 0;
       if (e.main){
-        var pl = row.sets.map(function(s){ return r25(tm[e.main]*s[0]); });
-        kg = fmt(pl[pl.length-1]) + 'kg';
-        sch = row.scheme;
-        sub = pl.map(fmt).join(' → ');
+        var mplan = row.sets.map(function(s){ return {kg:r25(tm[e.main]*s[0]), reps:s[1], plus:!!s[2]}; });
+        var mkey = keyOf(e.n), mtag = EX[mkey] ? 'button' : 'div';
+        return '<'+mtag+(mtag === 'button' ? ' type="button" data-guide="'+mkey+'"' : '')
+          + ' class="ex main mainlist" style="--mc:var(--p'+({sq:'25',bp:'20',dl:'15',ohp:'10'}[e.main])+')">'
+          + '<span class="n">'+e.n+'</span>' + setList(mplan)
+          + '</'+mtag+'>';
       } else if (e.fsl){
         if (wib === 4) return '';
-        sch = e.sets + '세트 × 5회';
+        sch = '5회 × ' + e.sets + '세트';
         kg = fmt(r25(tm[e.fsl]*row.sets[0][0])) + 'kg';
-        sub = '첫 세트 무게';
+        sub = '위 1세트 무게로 다시';
       } else {
         if (!ns) return '';
         sch = ns + '세트 × ' + e.reps + '회';
@@ -778,9 +787,9 @@
       days += '<div class="day">'
         + '<div class="daytag">'+d.tag+' · '+DOW[d.dow]+'요일 · '+md(date)+'</div>'
         + '<h3>'+d.name+'</h3>'
-        + '<div class="tier"><b>근력 · 5/3/1</b><span>휴식 2~3분 · 마지막 세트 +</span></div>'
+        + '<div class="tier"><b>근력</b><span>2~3분 쉬기</span></div>'
         + '<div class="exlist">'+d.ex.filter(function(e){return e.tier==='s';}).map(exRow).join('')+'</div>'
-        + '<div class="tier hyp"><b>근비대</b><span>휴식 45~90초 · 마지막 세트 실패까지</span></div>'
+        + '<div class="tier hyp"><b>근비대</b><span>45~90초 쉬기 · 마지막 세트 끝까지</span></div>'
         + '<div class="exlist">'+d.ex.filter(function(e){return e.tier==='h';}).map(exRow).join('')+'</div>'
         + '</div>';
     });
