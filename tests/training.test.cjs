@@ -13,7 +13,7 @@ test('session set saves and restores, rejects blank RPE, guide opens',()=>{const
 test('assessment saves actual vs estimate, updates baseline and due date',()=>{const dom=boot(),w=dom.window;try{click(w,'[data-action="test"][data-lift="dl"]');change(w,'#test-kg','145');change(w,'#test-reps','3');w.document.getElementById('test-form-check').checked=true;w.document.getElementById('test-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));assert.equal(w.Training.read().dl,159.5);const data=JSON.parse(w.localStorage.getItem('bigthree500.training.v2'));assert.equal(data.measurements[0].kind,'estimate');assert.match(w.document.getElementById('assessment').textContent,/56일 남음/);assert.match(w.document.getElementById('history').textContent,/추정/);click(w,'[data-action="test"][data-lift="sq"]');change(w,'#test-kind','actual');change(w,'#test-kg','140');w.document.getElementById('test-form-check').checked=true;w.document.getElementById('test-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));assert.equal(w.Training.read().sq,140);assert.match(w.document.getElementById('history').textContent,/실측/);}finally{w.close();}});
 test('all expanded exercises have guides and no duplicate IDs',()=>{const dom=boot(),w=dom.window;try{const ids=[...w.document.querySelectorAll('[id]')].map(e=>e.id);assert.equal(new Set(ids).size,ids.length);for(let i=0;i<5;i++){click(w,`[data-action="pick-day"][data-day="${i}"]`);click(w,'[data-action="start"]');const data=JSON.parse(w.localStorage.getItem('bigthree500.training.v2'));for(const e of Object.values(data.sessions).at(-1).exercises)assert.ok(w.ExerciseGuides[e.name],e.name);}}finally{w.close();}});
 function thisMonday(){const d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-test('5/3/1: training max is 90% of 1RM, waves and FSL, fixed increments per cycle, rebase on edit',()=>{
+test('5/3/1: training max is 90% of 1RM, waves and light back-off sets (FSL), fixed increments per cycle, rebase on edit',()=>{
   const W={sets:[[.65,5],[.75,5],[.85,5,'+']]};
   assert.deepEqual(C.mainSets(C.tmOf(105),W).map(s=>[s.kg,s.reps,s.amrap]),[[62.5,5,false],[72.5,5,false],[80,5,true]]);
   assert.deepEqual(C.prescription({fsl:'bp'},W,1,{bp:105}),{sets:5,reps:5,kg:62.5});
@@ -63,6 +63,6 @@ test('AMRAP last set raises the baseline, flags missed minimums, and skips deloa
     click(rw,'[data-action="pick-day"][data-day="1"]');click(rw,'[data-action="start"]');
     assert.equal(rw.document.querySelectorAll('.set-row.amrap').length,0);
     const data=JSON.parse(rw.localStorage.getItem('bigthree500.training.v2'));
-    assert.ok(!Object.values(data.sessions).at(-1).exercises.some(e=>/FSL/.test(e.name)));
+    assert.ok(!Object.values(data.sessions).at(-1).exercises.some(e=>/가벼운 반복/.test(e.name)));
   }finally{rw.close();}
 });

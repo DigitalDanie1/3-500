@@ -26,7 +26,7 @@
     {wk:'3주차', label:'5/3/1', scheme:'5회 · 3회 · 최대한', sets:[[.75,5],[.85,3],[.95,1,'+']], amrap:true,
      note:'가장 무거운 주. 1+는 1회가 최소치입니다 — 자세가 버티는 데까지 계속 가세요.'},
     {wk:'4주차', label:'디로드', scheme:'5회 · 5회 · 5회',  sets:[[.40,5],[.50,5],[.60,5]],
-     note:'디로드. FSL 없음, 보조 운동도 2세트. 다음 주에 기준값이 올라갑니다.'}
+     note:'디로드. 가벼운 반복 없음, 보조 운동도 2세트. 다음 주에 기준값이 올라갑니다.'}
   ];
   var INC = {sq:5, dl:5, bp:2.5, ohp:2.5};   /* 사이클마다 TM 증량 (5/3/1 표준) */
 
@@ -495,7 +495,7 @@
     {tag:'DAY 1', dow:0, name:'하체', sub:'스쿼트 고강도 + 대퇴사두·종아리',
      ex:[
       {n:'백스쿼트', main:'sq', tier:'s'},
-      {n:'백스쿼트 (FSL)', fsl:'sq', sets:5, tier:'s'},
+      {n:'백스쿼트 (가벼운 반복)', fsl:'sq', sets:5, tier:'s'},
       {n:'루마니안 데드리프트', reps:8, sets:[3,3,3,2], pct:0.50, of:'dl', tier:'s'},
       {n:'레그 프레스', reps:12, sets:[3,4,5,2], est:['sq',1.05], note:'기계마다 다름', tier:'h'},
       {n:'레그 익스텐션', reps:15, sets:[3,3,4,2], est:['bw',0.45], tier:'h'},
@@ -506,7 +506,7 @@
     {tag:'DAY 2', dow:1, name:'가슴', sub:'벤치 고강도 + 가슴 3각도·삼두',
      ex:[
       {n:'벤치프레스', main:'bp', tier:'s'},
-      {n:'벤치프레스 (FSL)', fsl:'bp', sets:5, tier:'s'},
+      {n:'벤치프레스 (가벼운 반복)', fsl:'bp', sets:5, tier:'s'},
       {n:'인클라인 덤벨 프레스', reps:8, sets:[4,4,4,2], est:['bp',0.28], note:'한쪽', tier:'s'},
       {n:'머신 체스트 프레스', reps:10, sets:[3,4,4,2], est:['bp',0.55], tech:'마지막 세트 드롭', tier:'h'},
       {n:'인클라인 케이블 플라이', reps:15, sets:[3,4,4,2], est:['bp',0.13], tech:'마지막 세트 드롭', note:'한쪽 · 상부', tier:'h'},
@@ -517,7 +517,7 @@
     {tag:'DAY 3', dow:2, name:'등', sub:'데드리프트 고강도 + 광배 폭·두께·승모',
      ex:[
       {n:'데드리프트', main:'dl', tier:'s'},
-      {n:'데드리프트 (FSL)', fsl:'dl', sets:3, tier:'s'},
+      {n:'데드리프트 (가벼운 반복)', fsl:'dl', sets:3, tier:'s'},
       {n:'바벨 로우', reps:8, sets:[4,4,4,2], pct:0.50, of:'dl', tier:'s'},
       {n:'랫풀다운', reps:12, sets:[3,4,4,2], est:['bw',0.80], tech:'마지막 세트 레스트-포즈', note:'와이드 · 광배 폭', tier:'h'},
       {n:'체스트 서포티드 로우', reps:12, sets:[3,4,4,2], est:['bw',0.70], tech:'마지막 세트 레스트-포즈', note:'중간 등 두께', tier:'h'},
@@ -529,7 +529,7 @@
     {tag:'DAY 4', dow:3, name:'어깨 · 팔', sub:'OHP 고강도 + 벤치 2회차 + 삼각근 3갈래·팔',
      ex:[
       {n:'오버헤드 프레스', main:'ohp', tier:'s'},
-      {n:'오버헤드 프레스 (FSL)', fsl:'ohp', sets:5, tier:'s'},
+      {n:'오버헤드 프레스 (가벼운 반복)', fsl:'ohp', sets:5, tier:'s'},
       {n:'포즈 / 스포토 벤치', reps:5, sets:[3,3,3,2], pct:0.65, of:'bp', tier:'s'},
       {n:'사이드 레터럴 레이즈', reps:15, sets:[4,4,5,2], est:['bw',0.10], tech:'마지막 세트 드롭', note:'한쪽 · 덤벨', tier:'h'},
       {n:'케이블 사이드 레터럴', reps:15, sets:[3,3,4,2], est:['bw',0.09], tech:'3단 드롭세트', note:'한쪽', tier:'h'},
@@ -691,7 +691,7 @@
 
     /* 배너 */
     var msg = '';
-    if (wib === 4) msg = '<b>디로드.</b> 메인은 TM의 40 · 50 · 60%로 가볍게, FSL은 쉬고 보조 운동도 2세트. 다음 주에 기준값(TM)이 스쿼트·데드 +5kg, 벤치·OHP +2.5kg 올라갑니다.';
+    if (wib === 4) msg = '<b>디로드.</b> 메인은 TM의 40 · 50 · 60%로 가볍게, 가벼운 반복은 쉬고 보조 운동도 2세트. 다음 주에 기준값(TM)이 스쿼트·데드 +5kg, 벤치·OHP +2.5kg 올라갑니다.';
     else if (wib === 3) msg = '<b>5/3/1 주.</b> 사이클에서 가장 무거운 주입니다. 마지막 세트는 1번만 들어도 되지만, <b>되는 만큼 계속 드세요.</b>';
     else if (wib === 1 && cyc > 1) msg = '<b>사이클 ' + cyc + ' 시작.</b> 기준값이 한 단계 올라갔습니다. 무게가 지난 사이클보다 높은 게 정상입니다.';
     else msg = '<b>한계는 네가 정하지 않는다.</b> 메인 종목의 <b>마지막 세트는 &lsquo;최대한&rsquo;</b> — 정해진 횟수가 없어. 자세가 무너지기 직전까지 들고, 실제로 든 횟수를 적으면 돼. 그 기록이 지금보다 높은 1RM을 가리키면 앱이 <b>자동으로 올립니다</b>.';
@@ -733,7 +733,7 @@
       cards += '<div class="lcard">'
         + '<div class="top"><span class="chipdot '+k+'"'+(k==='ohp'?' style="background:var(--p10)"':'')+'></span>'+names[k]+' <span class="when" style="margin-left:auto">'+dayOf[k]+'요일</span></div>'
         + setList(plan)
-        + (fslN ? '<div class="backoff">그다음 <b>FSL</b> — 1세트 무게 <b>'+fmt(plan[0].kg)+'kg</b>로 다시 5회 × '+fslN+'세트</div>' : '<div class="backoff">디로드 — FSL 없음</div>')
+        + (fslN ? '<div class="backoff">그다음 <b>가벼운 반복</b> — 1세트 무게 <b>'+fmt(plan[0].kg)+'kg</b>로 다시 5회 × '+fslN+'세트</div>' : '<div class="backoff">디로드 — 가벼운 반복 없음</div>')
         + '<div class="sub">마지막 세트 원판(한쪽) <span class="pl" style="display:inline-flex;vertical-align:middle">'+plateHTML(top.kg)+'</span></div>'
         + '<div class="sub">기준값 '+fmt(tm[k])+'kg (1RM '+fmt(v[k])+'kg의 90%)</div>'
         + '</div>';
@@ -761,7 +761,7 @@
         if (!ns) return '';
         sch = ns + '세트 × ' + e.reps + '회';
         if (e.pct){
-          var w = r25(v[e.of] * e.pct);   /* 보조 %는 1RM 기준 (TM은 메인·FSL 전용) */
+          var w = r25(v[e.of] * e.pct);   /* 보조 %는 1RM 기준 (TM은 메인·가벼운 반복 전용) */
           kg = fmt(wib === 4 ? r25(w * 0.85) : w) + 'kg';
         } else if (e.est){
           var base = e.est[0] === 'bw' ? v.bw : v[e.est[0]];
@@ -849,7 +849,7 @@
     try{ done = localStorage.getItem('bigthree500.program') === '531'; }catch(e){}
     box.hidden = done;
     if (done) return;
-    box.innerHTML = '<b>프로그램이 5/3/1로 바뀌었습니다.</b> 기준값(TM)이 1RM의 90%로 다시 잡히고, 메인 종목은 3세트 + FSL로 바뀝니다. 새 사이클을 이번 주부터 1주차로 시작하는 걸 추천합니다.'
+    box.innerHTML = '<b>프로그램이 5/3/1로 바뀌었습니다.</b> 기준값(TM)이 1RM의 90%로 다시 잡히고, 메인 종목은 3세트 + 가벼운 반복으로 바뀝니다. 새 사이클을 이번 주부터 1주차로 시작하는 걸 추천합니다.'
       + '<div class="switch-actions"><button class="primary" data-switch="fresh">이번 주를 1주차로 시작</button>'
       + '<button class="ghost" data-switch="keep">지금 주차 그대로</button></div>';
     box.onclick = function(e){
