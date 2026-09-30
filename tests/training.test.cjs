@@ -12,16 +12,35 @@ test('legacy values migrate without overwriting and tabs default to training',()
 test('session set saves and restores, rejects blank RPE, guide opens',()=>{const dom=boot(),w=dom.window;try{click(w,'[data-action="pick-day"][data-day="0"]');click(w,'[data-action="start"]');click(w,'[data-done="0:0"]');assert.equal(w.document.querySelector('[data-done="0:0"]').checked,false);change(w,'[data-row="0:0:rpe"]','8');click(w,'[data-done="0:0"]');assert.equal(w.document.querySelector('[data-done="0:0"]').checked,true);const data=JSON.parse(w.localStorage.getItem('bigthree500.training.v2'));assert.equal(Object.values(data.sessions)[0].exercises[0].rows[0].rpe,8);click(w,'[data-guide="백스쿼트"]');assert.equal(w.document.getElementById('guide-dialog').open,true);assert.match(w.document.getElementById('guide-body').textContent,/흔한 실수/);const next=boot({'bigthree500.training.v2':data});try{click(next.window,'[data-action="pick-day"][data-day="0"]');click(next.window,'[data-action="start"]');assert.equal(next.window.document.querySelector('[data-done="0:0"]').checked,true);}finally{next.window.close();}}finally{w.close();}});
 test('assessment saves actual vs estimate, updates baseline and due date',()=>{const dom=boot(),w=dom.window;try{click(w,'[data-action="test"][data-lift="dl"]');change(w,'#test-kg','145');change(w,'#test-reps','3');w.document.getElementById('test-form-check').checked=true;w.document.getElementById('test-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));assert.equal(w.Training.read().dl,159.5);const data=JSON.parse(w.localStorage.getItem('bigthree500.training.v2'));assert.equal(data.measurements[0].kind,'estimate');assert.match(w.document.getElementById('assessment').textContent,/56일 남음/);assert.match(w.document.getElementById('history').textContent,/추정/);click(w,'[data-action="test"][data-lift="sq"]');change(w,'#test-kind','actual');change(w,'#test-kg','140');w.document.getElementById('test-form-check').checked=true;w.document.getElementById('test-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));assert.equal(w.Training.read().sq,140);assert.match(w.document.getElementById('history').textContent,/실측/);}finally{w.close();}});
 test('all expanded exercises have guides and no duplicate IDs',()=>{const dom=boot(),w=dom.window;try{const ids=[...w.document.querySelectorAll('[id]')].map(e=>e.id);assert.equal(new Set(ids).size,ids.length);for(let i=0;i<5;i++){click(w,`[data-action="pick-day"][data-day="${i}"]`);click(w,'[data-action="start"]');const data=JSON.parse(w.localStorage.getItem('bigthree500.training.v2'));for(const e of Object.values(data.sessions).at(-1).exercises)assert.ok(w.ExerciseGuides[e.name],e.name);}}finally{w.close();}});
-test('AMRAP last set raises the baseline, never lowers it, and skips recovery week',()=>{
+function thisMonday(){const d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+test('5/3/1: training max is 90% of 1RM, waves and FSL, fixed increments per cycle, rebase on edit',()=>{
+  const W={sets:[[.65,5],[.75,5],[.85,5,'+']]};
+  assert.deepEqual(C.mainSets(C.tmOf(105),W).map(s=>[s.kg,s.reps,s.amrap]),[[62.5,5,false],[72.5,5,false],[80,5,true]]);
+  assert.deepEqual(C.prescription({fsl:'bp'},W,1,{bp:105}),{sets:5,reps:5,kg:62.5});
+  assert.equal(C.prescription({fsl:'bp'},{sets:[[.4,5],[.5,5],[.6,5]]},4,{bp:105}).sets,0);
+  const dom=boot({'bigthree500.v1':{sq:130,bp:105,dl:160,ohp:65,bw:76},'bigthree500.week.v1':{week:1,start:thisMonday(),checks:{}}}),w=dom.window;
+  try{
+    const T=w.Training;
+    assert.deepEqual({...T.tmFor(1)},{sq:117.5,bp:95,dl:145,ohp:57.5});
+    assert.deepEqual({...T.tmFor(5)},{sq:122.5,bp:97.5,dl:150,ohp:60});
+    assert.deepEqual({...T.tmFor(9)},{sq:127.5,bp:100,dl:155,ohp:62.5});
+    T.inputs.bp.value=110;T.render();
+    assert.equal(T.tmFor(1).bp,100);assert.equal(T.tmFor(5).bp,102.5);
+    assert.match(w.document.getElementById('wLifts').textContent,/OHP/);
+  }finally{w.close();}
+});
+test('AMRAP last set raises the baseline, flags missed minimums, and skips deload',()=>{
   assert.equal(C.amrap(85,8),107.5);assert.equal(C.amrap(85,14),112.5);assert.equal(C.amrap(0,5),null);
-  const base={'bigthree500.v1':{sq:130,bp:105,dl:160,bw:76},'bigthree500.week.v1':{week:2,start:'2026-09-14',checks:{}}};
+  const base={'bigthree500.v1':{sq:130,bp:105,dl:160,ohp:65,bw:76},'bigthree500.week.v1':{week:2,start:thisMonday(),checks:{}}};
   const dom=boot(base),w=dom.window;
   try{
+    w.Training.goWeek(2);
     click(w,'[data-action="pick-day"][data-day="1"]');click(w,'[data-action="start"]');
     const rows=[...w.document.querySelectorAll('.set-row')].filter(r=>r.querySelector('[data-row^="0:"]'));
-    assert.equal(rows.length,5);assert.ok(rows[4].classList.contains('amrap'));assert.ok(!rows[0].classList.contains('amrap'));
-    change(w,'[data-row="0:4:kg"]','85');change(w,'[data-row="0:4:reps"]','8');change(w,'[data-row="0:4:rpe"]','10');
-    click(w,'[data-done="0:4"]');
+    assert.equal(rows.length,3);assert.ok(rows[2].classList.contains('amrap'));assert.ok(!rows[0].classList.contains('amrap'));
+    assert.equal(w.document.querySelector('[data-row="0:2:kg"]').value,'85');
+    change(w,'[data-row="0:2:kg"]','85');change(w,'[data-row="0:2:reps"]','8');change(w,'[data-row="0:2:rpe"]','10');
+    click(w,'[data-done="0:2"]');
     assert.equal(w.Training.read().bp,107.5);
     assert.match(w.document.getElementById('session-feedback').textContent,/107\.5kg로 올렸습니다/);
     const m=JSON.parse(w.localStorage.getItem('bigthree500.training.v2')).measurements.at(-1);
@@ -29,14 +48,21 @@ test('AMRAP last set raises the baseline, never lowers it, and skips recovery we
   }finally{w.close();}
   const low=boot(base),lw=low.window;
   try{
+    lw.Training.goWeek(2);
     click(lw,'[data-action="pick-day"][data-day="1"]');click(lw,'[data-action="start"]');
-    change(lw,'[data-row="0:4:kg"]','85');change(lw,'[data-row="0:4:reps"]','4');change(lw,'[data-row="0:4:rpe"]','8');
-    click(lw,'[data-done="0:4"]');
+    change(lw,'[data-row="0:2:reps"]','2');change(lw,'[data-row="0:2:rpe"]','10');
+    click(lw,'[data-done="0:2"]');
     assert.equal(lw.Training.read().bp,105);
+    assert.match(lw.document.getElementById('session-feedback').textContent,/최소 3회를 못 채웠습니다/);
+    click(lw,'[data-reset-lift="bp"]');
+    assert.equal(lw.Training.read().bp,95);
   }finally{lw.close();}
-  const rec=boot({...base,'bigthree500.week.v1':{week:4,start:'2026-09-14',checks:{}}}),rw=rec.window;
+  const rec=boot({...base,'bigthree500.week.v1':{week:4,start:thisMonday(),checks:{}}}),rw=rec.window;
   try{
+    rw.Training.goWeek(4);
     click(rw,'[data-action="pick-day"][data-day="1"]');click(rw,'[data-action="start"]');
     assert.equal(rw.document.querySelectorAll('.set-row.amrap').length,0);
+    const data=JSON.parse(rw.localStorage.getItem('bigthree500.training.v2'));
+    assert.ok(!Object.values(data.sessions).at(-1).exercises.some(e=>/FSL/.test(e.name)));
   }finally{rw.close();}
 });

@@ -45,6 +45,14 @@
   "모빌리티 (고관절·흉추·발목)": {en:"Mobility Work", target:"척추기립근 · 둔근", sub:"햄스트링 · 종아리", steps:["고관절: 90/90", "카우치 스트레치", "흉추: 폼롤러 신전", "오픈북", "발목: 벽에 무릎 밀기 (뒤꿈치 고정)"], cue:"고관절: 90/90", avoid:"반동으로 튕기는 것 / 아픈 지점까지 밀어붙이는 것", easy:"가벼운 스트레칭", why:"스쿼트 깊이와 데드 시작 자세는 힘이 아니라 가동범위 문제인 경우가 많습니다.", p:["erector", "glute"], s:["ham", "calf"], source:"https://www.acefitness.org/resources/everyone/exercise-library/"},
   "플랭크 + 레그레이즈": {en:"Plank + Leg Raise", target:"복근", sub:"척추기립근 · 둔근", steps:["플랭크는 골반을 살짝 말아 60초", "레그레이즈는 허리를 바닥에 붙인 채", "호흡을 멈추지 않는다"], cue:"플랭크는 골반을 살짝 말아 60초", avoid:"플랭크에서 엉덩이가 뜨거나 처지는 것 / 레그레이즈에서 허리가 뜨는 것", easy:"무릎 대고 플랭크", why:"훈련하지 않는 이틀 동안 코어만은 유지합니다.", p:["abs"], s:["erector", "glute"], source:"https://www.acefitness.org/resources/everyone/exercise-library/"},
   };
+  /* FSL(First Set Last) — 메인 종목의 첫 세트 무게로 5×5. 동작은 메인과 같다. */
+  [['백스쿼트 (FSL)','백스쿼트'],['벤치프레스 (FSL)','벤치프레스'],['데드리프트 (FSL)','데드리프트'],['오버헤드 프레스 (FSL)','오버헤드 프레스']].forEach(function(p){
+    if (!G[p[1]]) return;
+    G[p[0]] = Object.assign({}, G[p[1]], {
+      why: 'FSL(First Set Last) — 메인 세트가 끝난 뒤 첫 세트 무게로 돌아와 5회씩 반복합니다. 5/3/1은 무거운 세트가 적은 대신 여기서 볼륨을 채웁니다. 바 속도가 빠르게 유지되는 무게입니다.'
+    });
+  });
+  if (G['오버헤드 프레스']) G['오버헤드 프레스'].why = '목요일 5/3/1 메인 종목. 어깨 전체와 삼두, 그리고 벤치를 받치는 상체 안정성을 만듭니다.';
   if (typeof module !== 'undefined' && module.exports) module.exports = G;
   else root.ExerciseGuides = G;
 })(typeof window !== 'undefined' ? window : globalThis);

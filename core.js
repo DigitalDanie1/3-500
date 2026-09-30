@@ -22,11 +22,26 @@
     const days=Math.round((date(target)-date(today))/86400000);
     return {date:target,days,overdue:days<0,unknown:!date(last)};
   }
-  function prescription(e,wave,wib,v){
+  /* 5/3/1: 기준값(TM) = 1RM × 90% */
+  function tmOf(oneRM){ return round(oneRM*0.9); }
+  /* wave.sets = [[TM 대비 %, 횟수, '+'?], ...] → 세트별 무게·횟수 */
+  function mainSets(tm,wave){
+    return wave.sets.map(([p,r,plus])=>({kg:round(tm*p),reps:r,amrap:!!plus}));
+  }
+  function prescription(e,wave,wib,v,tm){
     const deload=wib===4?.85:1;
+    const tmv=k=>(tm&&tm[k])||tmOf(v[k]);
     if(e.main){
+      if(Array.isArray(wave.sets)){
+        const plan=mainSets(tmv(e.main),wave),top=plan[plan.length-1];
+        return {sets:plan.length,reps:top.reps,kg:top.kg,plan,tm:tmv(e.main)};
+      }
       const [s,r]=String(wave.scheme).split('×').map(x=>parseInt(x,10));
       return {sets:s,reps:r,kg:round(v[e.main]*wave.pct)};
+    }
+    if(e.fsl){
+      if(!Array.isArray(wave.sets)||wib===4) return {sets:0,reps:5,kg:null};
+      return {sets:e.sets||5,reps:5,kg:round(tmv(e.fsl)*wave.sets[0][0])};
     }
     let sets,reps;
     if(Array.isArray(e.sets)){ sets=e.sets[wib-1]; reps=e.reps; }
@@ -49,6 +64,6 @@
     const r=Math.min(Math.floor(reps),10);
     return Math.floor(kg*(1+r/30)/2.5)*2.5;
   }
-  const api={iso,date,add,round,warmup,estimate,due,prescription,plates,amrap};
+  const api={iso,date,add,round,warmup,estimate,due,prescription,plates,amrap,tmOf,mainSets};
   if(typeof module!=='undefined'&&module.exports) module.exports=api; else root.TrainingCore=api;
 })(typeof window!=='undefined'?window:globalThis);

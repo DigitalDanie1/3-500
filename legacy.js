@@ -5,7 +5,8 @@
   var LIFTS = [
     {k:'sq', name:'스쿼트',    target:180, def:130},
     {k:'bp', name:'벤치',      target:120, def:100},
-    {k:'dl', name:'데드리프트', target:200, def:160}
+    {k:'dl', name:'데드리프트', target:200, def:160},
+    {k:'ohp', name:'OHP', target:0, def:65}
   ];
 
   var PHASES = [
@@ -15,16 +16,23 @@
     {lab:'페이즈 4', sub:'19~24개월 · 84kg', sq:180,   bp:120,   dl:200,   bw:84}
   ];
 
+  /* 5/3/1 — 퍼센트는 1RM이 아니라 기준값(TM = 1RM × 90%) 대비.
+     마지막 세트 '+'는 횟수 제한 없음(AMRAP). 4주차는 디로드. */
   var WAVE = [
-    {wk:'1주차', scheme:'5세트 × 5회+', pct:0.75,  label:'볼륨', amrap:true, note:'마지막 세트(+)는 멈추지 말고 끝까지. 자세가 무너지기 직전 한 개에서 멈추세요.'},
-    {wk:'2주차', scheme:'5세트 × 4회+', pct:0.80,  label:'기반', amrap:true, note:'마지막 세트(+)는 끝까지. 여기서 8회 이상 나오면 1RM이 자동으로 올라갑니다.'},
-    {wk:'3주차', scheme:'4세트 × 3회+', pct:0.875, label:'강도 정점', amrap:true, note:'마지막 세트(+)는 끝까지. 블록에서 가장 무거운 AMRAP — 1RM이 가장 크게 움직이는 날입니다.'},
-    {wk:'4주차', scheme:'2세트 × 5회', pct:0.60, label:'회복', note:'회복 주차입니다. 강도를 올린 만큼 이 주는 반드시 지키세요 — 건너뛰면 3주차에서 무너집니다.'}
+    {wk:'1주차', label:'5s',    scheme:'5 · 5 · 5+', sets:[[.65,5],[.75,5],[.85,5,'+']], amrap:true,
+     note:'마지막 세트(5+)는 끝까지. 5회는 최소치이고, 목표는 그 이상입니다.'},
+    {wk:'2주차', label:'3s',    scheme:'3 · 3 · 3+', sets:[[.70,3],[.80,3],[.90,3,'+']], amrap:true,
+     note:'마지막 세트(3+)는 끝까지. 여기서 8회 이상 나오면 1RM이 자동으로 올라갑니다.'},
+    {wk:'3주차', label:'5/3/1', scheme:'5 · 3 · 1+', sets:[[.75,5],[.85,3],[.95,1,'+']], amrap:true,
+     note:'가장 무거운 주. 1+는 1회가 최소치입니다 — 자세가 버티는 데까지 계속 가세요.'},
+    {wk:'4주차', label:'디로드', scheme:'5 · 5 · 5',  sets:[[.40,5],[.50,5],[.60,5]],
+     note:'디로드. FSL 없음, 보조 운동도 2세트. 다음 주에 기준값이 올라갑니다.'}
   ];
+  var INC = {sq:5, dl:5, bp:2.5, ohp:2.5};   /* 사이클마다 TM 증량 (5/3/1 표준) */
 
   var SIZES = [25,20,15,10,5,2.5,1.25];
   var $ = function(id){ return document.getElementById(id); };
-  var inputs = {sq:$('iSq'), bp:$('iBp'), dl:$('iDl'), bw:$('iBw')};
+  var inputs = {sq:$('iSq'), bp:$('iBp'), dl:$('iDl'), ohp:$('iOhp'), bw:$('iBw')};
 
   function r25(x){ return Math.round(x/2.5)*2.5; }
   function fmt(x){ return (Math.round(x*100)/100).toString(); }
@@ -47,8 +55,8 @@
 
   function read(){
     var v = {};
-    ['sq','bp','dl','bw'].forEach(function(k){
-      var n = parseFloat(inputs[k].value);
+    ['sq','bp','dl','ohp','bw'].forEach(function(k){
+      var n = inputs[k] ? parseFloat(inputs[k].value) : NaN;
       if (!isFinite(n) || n <= 0) n = k==='bw' ? 76 : LIFTS.filter(function(l){return l.k===k;})[0].def;
       v[k] = n;
     });
@@ -61,8 +69,8 @@
       var raw = localStorage.getItem(KEY);
       if (!raw) return;
       var v = JSON.parse(raw);
-      ['sq','bp','dl','bw'].forEach(function(k){
-        if (typeof v[k] === 'number' && isFinite(v[k]) && v[k] > 0) inputs[k].value = v[k];
+      ['sq','bp','dl','ohp','bw'].forEach(function(k){
+        if (inputs[k] && typeof v[k] === 'number' && isFinite(v[k]) && v[k] > 0) inputs[k].value = v[k];
       });
     } catch(e){}
   }
@@ -127,16 +135,17 @@
     });
     $('chart').innerHTML = html;
 
-    var w = '';
+    var w = '', ctm = tmFor(v, realWeek());
     WAVE.forEach(function(row){
-      var cell = function(base){
-        var kg = r25(base * row.pct);
-        return '<td><div class="wavecell"><span class="num">'+fmt(kg)+'</span><span class="pl">'+plateHTML(kg)+'</span></div></td>';
+      var top = row.sets[row.sets.length-1];
+      var cell = function(k){
+        var kg = r25(ctm[k] * top[0]);
+        return '<td><div class="wavecell"><span class="num">'+fmt(kg)+(top[2]?'<small>+</small>':'')+'</span><span class="pl">'+plateHTML(kg)+'</span></div></td>';
       };
       w += '<tr>'
-        + '<td><span class="scheme">'+row.wk+'</span><br><span class="pct">'+Math.round(row.pct*1000)/10+'%</span></td>'
-        + '<td><span class="scheme">'+row.scheme+'</span></td>'
-        + cell(v.sq) + cell(v.bp) + cell(v.dl)
+        + '<td><span class="scheme">'+row.wk+'</span><br><span class="pct">'+row.label+'</span></td>'
+        + '<td><span class="scheme">'+row.scheme+'</span><br><span class="pct">'+row.sets.map(function(s){return Math.round(s[0]*100)+'%';}).join(' · ')+'</span></td>'
+        + cell('sq') + cell('bp') + cell('dl') + cell('ohp')
         + '<td style="text-align:left"><span class="wknote">'+row.note+'</span></td>'
         + '</tr>';
     });
@@ -486,6 +495,7 @@
     {tag:'DAY 1', dow:0, name:'하체', sub:'스쿼트 고강도 + 대퇴사두·종아리',
      ex:[
       {n:'백스쿼트', main:'sq', tier:'s'},
+      {n:'백스쿼트 (FSL)', fsl:'sq', sets:5, tier:'s'},
       {n:'루마니안 데드리프트', reps:8, sets:[3,3,3,2], pct:0.50, of:'dl', tier:'s'},
       {n:'레그 프레스', reps:12, sets:[3,4,5,2], est:['sq',1.05], note:'기계마다 다름', tier:'h'},
       {n:'레그 익스텐션', reps:15, sets:[3,3,4,2], est:['bw',0.45], tier:'h'},
@@ -496,6 +506,7 @@
     {tag:'DAY 2', dow:1, name:'가슴', sub:'벤치 고강도 + 가슴 3각도·삼두',
      ex:[
       {n:'벤치프레스', main:'bp', tier:'s'},
+      {n:'벤치프레스 (FSL)', fsl:'bp', sets:5, tier:'s'},
       {n:'인클라인 덤벨 프레스', reps:8, sets:[4,4,4,2], est:['bp',0.28], note:'한쪽', tier:'s'},
       {n:'머신 체스트 프레스', reps:10, sets:[3,4,4,2], est:['bp',0.55], tech:'마지막 세트 드롭', tier:'h'},
       {n:'인클라인 케이블 플라이', reps:15, sets:[3,4,4,2], est:['bp',0.13], tech:'마지막 세트 드롭', note:'한쪽 · 상부', tier:'h'},
@@ -506,6 +517,7 @@
     {tag:'DAY 3', dow:2, name:'등', sub:'데드리프트 고강도 + 광배 폭·두께·승모',
      ex:[
       {n:'데드리프트', main:'dl', tier:'s'},
+      {n:'데드리프트 (FSL)', fsl:'dl', sets:3, tier:'s'},
       {n:'바벨 로우', reps:8, sets:[4,4,4,2], pct:0.50, of:'dl', tier:'s'},
       {n:'랫풀다운', reps:12, sets:[3,4,4,2], est:['bw',0.80], tech:'마지막 세트 레스트-포즈', note:'와이드 · 광배 폭', tier:'h'},
       {n:'체스트 서포티드 로우', reps:12, sets:[3,4,4,2], est:['bw',0.70], tech:'마지막 세트 레스트-포즈', note:'중간 등 두께', tier:'h'},
@@ -514,11 +526,11 @@
       {n:'바벨 슈러그', reps:12, sets:[3,4,4,2], est:['dl',0.45], note:'맨 위 1초', tier:'h'},
       {n:'인클라인 덤벨 컬', reps:12, sets:[3,3,4,2], est:['bp',0.12], note:'한쪽', tier:'h'}
      ]},
-    {tag:'DAY 4', dow:3, name:'어깨 · 팔', sub:'벤치 2회차 + 삼각근 3갈래·팔',
+    {tag:'DAY 4', dow:3, name:'어깨 · 팔', sub:'OHP 고강도 + 벤치 2회차 + 삼각근 3갈래·팔',
      ex:[
-      {n:'포즈 / 스포토 벤치', reps:6, sets:[4,4,4,2], pct:0.65, of:'bp', tier:'s'},
-      {n:'오버헤드 프레스', reps:6, sets:[4,4,4,2], pct:0.60, of:'bp', tier:'s'},
-      {n:'덤벨 숄더 프레스', reps:10, sets:[3,4,4,2], est:['bp',0.22], note:'한쪽', tier:'h'},
+      {n:'오버헤드 프레스', main:'ohp', tier:'s'},
+      {n:'오버헤드 프레스 (FSL)', fsl:'ohp', sets:5, tier:'s'},
+      {n:'포즈 / 스포토 벤치', reps:5, sets:[3,3,3,2], pct:0.65, of:'bp', tier:'s'},
       {n:'사이드 레터럴 레이즈', reps:15, sets:[4,4,5,2], est:['bw',0.10], tech:'마지막 세트 드롭', note:'한쪽 · 덤벨', tier:'h'},
       {n:'케이블 사이드 레터럴', reps:15, sets:[3,3,4,2], est:['bw',0.09], tech:'3단 드롭세트', note:'한쪽', tier:'h'},
       {n:'리어 델트 플라이', reps:15, sets:[3,4,4,2], est:['bw',0.10], tech:'마지막 세트 드롭', note:'한쪽', tier:'h'},
@@ -615,10 +627,32 @@
     }
     return 1;
   }
-  /* 기준 1RM은 네가 입력한 값 그대로다. 달력이 올려주지 않는다 —
-     올리려면 측정 주차에 실제로 재서 직접 바꿔야 한다. */
-  function tmFor(v, block){
-    return {sq:v.sq, bp:v.bp, dl:v.dl};
+  /* 5/3/1 기준값(TM).
+     TM = 입력한 1RM × 90% + 사이클 증량(스쿼트·데드 +5, 벤치·OHP +2.5).
+     1RM 입력값이 바뀌면(직접 수정·AMRAP 상향·1RM 점검) 그 사이클부터 증량을 다시 센다 —
+     새 1RM에 이미 그동안의 성장이 들어 있으니 이중으로 더하지 않는다. */
+  var TMKEY = 'bigthree500.tm.v1';
+  function cycleOf(week){ return Math.floor((week-1)/4) + 1; }
+  function realWeek(){
+    var st = parseISO(wState.start) || mondayOf(new Date());
+    return Math.max(1, Math.floor((mondayOf(new Date()) - st) / 604800000) + 1);
+  }
+  function tmBase(v){
+    var s = {}; try{ s = JSON.parse(localStorage.getItem(TMKEY) || '{}') || {}; }catch(e){}
+    var cur = cycleOf(realWeek()), changed = false;
+    ['sq','bp','dl','ohp'].forEach(function(k){
+      if (!s[k] || s[k].b !== v[k]){ s[k] = {b:v[k], c:cur}; changed = true; }
+    });
+    if (changed){ try{ localStorage.setItem(TMKEY, JSON.stringify(s)); }catch(e){} }
+    return s;
+  }
+  function resetTmBase(){ try{ localStorage.removeItem(TMKEY); }catch(e){} }
+  function tmFor(v, week){
+    var s = tmBase(v), cyc = cycleOf(week), o = {};
+    ['sq','bp','dl','ohp'].forEach(function(k){
+      o[k] = r25(v[k] * 0.9) + Math.max(0, cyc - s[k].c) * INC[k];
+    });
+    return o;
   }
   /* 계획상의 목표치 (로드맵 차트 전용, 실제 처방에는 쓰지 않음) */
   function projected(v, block){
@@ -636,12 +670,12 @@
     var block = Math.floor((week-1)/4);
     var wib = ((week-1) % 4) + 1;
     var row = WAVE[wib-1];
-    var tm = tmFor(v, block);
+    var tm = tmFor(v, week), cyc = cycleOf(week), future = week > realWeek();
     var phase = phaseOf(block);
 
     $('wTitle').textContent = week + '주차';
-    $('wMeta').textContent = '페이즈 ' + phase + ' · 블록 ' + (block+1) + ' / ' + (LAST_BLOCK+1) + ' · 블록 내 ' + wib + '주차 · ' +
-      Math.ceil(week/(52/12)) + '개월차';
+    $('wMeta').textContent = '5/3/1 · 사이클 ' + cyc + ' · ' + wib + '주차 (' + row.label + ') · ' +
+      Math.ceil(week/(52/12)) + '개월차' + (future ? ' · 예상치' : '');
 
     var start = parseISO($('wStart').value) || mondayOf(new Date());
     var mon = addDays(start, (week-1)*7);
@@ -649,74 +683,52 @@
 
     /* 배너 */
     var msg = '';
-    if (wib === 4) msg = '<b>회복 주차.</b> 메인은 전부 55%로 2세트 × 5회, 근비대 보조는 2세트에 무게 15% 감량. 이번 주는 가볍게 가는 게 목적입니다. 다음 블록을 시작하기 전에 기록을 보고 기준 1RM을 올릴지 직접 정하세요.';
-    else if (wib === 3) msg = '<b>강도 · 볼륨 정점 주차.</b> 근력 쪽은 가장 무겁고, 근비대 쪽은 세트 수가 가장 많은 주입니다. 이번 주가 제일 힘들어야 정상입니다. 근력 세트에서 정해진 횟수를 두 블록 연속 놓치면 무게를 더하지 말고 무거운 3회로 재측정하세요.';
-    else if (week === 1) msg = '<b>한계는 네가 정하지 않는다.</b> 메인 종목의 마지막 세트(<b>+</b> 표시)는 횟수 제한이 없습니다. 자세가 무너지기 직전까지 가고, 실제 횟수를 기록하세요. 계산된 1RM이 지금보다 높으면 앱이 <b>자동으로 올립니다</b>. 내리는 건 자동으로 하지 않습니다.';
-    else if (phase >= 3 && wib === 1) msg = '<b>페이즈 ' + phase + '.</b> 증가폭이 절반으로 줄었습니다. 무게는 이제 바가 아니라 약점 보완과 자세에서 나옵니다.';
+    if (wib === 4) msg = '<b>디로드.</b> 메인은 TM의 40 · 50 · 60%로 가볍게, FSL은 쉬고 보조 운동도 2세트. 다음 주에 기준값(TM)이 스쿼트·데드 +5kg, 벤치·OHP +2.5kg 올라갑니다.';
+    else if (wib === 3) msg = '<b>5/3/1 주.</b> 사이클에서 가장 무거운 주입니다. 마지막 세트 <b>1+</b>는 1회가 최소치일 뿐 — 자세가 버티는 데까지 계속 가세요.';
+    else if (wib === 1 && cyc > 1) msg = '<b>사이클 ' + cyc + ' 시작.</b> 기준값이 한 단계 올라갔습니다. 무게가 지난 사이클보다 높은 게 정상입니다.';
+    else msg = '<b>한계는 네가 정하지 않는다.</b> 메인 종목 마지막 세트(<b>+</b>)는 횟수 제한이 없습니다. 자세가 무너지기 직전까지 가고 실제 횟수를 기록하세요. 그 기록이 지금보다 높은 1RM을 가리키면 앱이 <b>자동으로 올립니다</b>.';
+    if (future) msg += ' <span style="color:var(--faint)">(미래 주차 — 사이클 증량만 반영한 예상치이고, 실제 기록에 따라 달라집니다.)</span>';
     $('wBanner').innerHTML = msg;
     $('wBanner').hidden = !msg;
 
-    /* 1RM 측정 주차 */
-    var testing = isTest(week);
-    $('wBadge').hidden = !testing;
-    var nt = nextTest(week);
-    $('wNextTest').innerHTML = testing
-      ? '이번 주에 1RM을 다시 잽니다 · 다음 측정은 ' + (nt ? nt + '주차' : '없음')
-      : (nt ? '다음 1RM 측정 &nbsp;<b>' + nt + '주차</b> &nbsp;— ' + (nt - week) + '주 남음' : '측정 일정 종료');
-    $('wTest').hidden = !testing;
-    if (testing){
-      var final = week >= 101, first = week === 1;
-      $('wProtoHd').textContent = first ? '1주차 — 데드리프트 실측'
-        : final ? '104주차 — 500 시도' : week + '주차 — 1RM 재측정';
-      $('wProtoWhy').innerHTML = first
-        ? '데드리프트 <strong>160kg</strong>은 비율로 뽑은 추정치입니다. 이번 주에 실제 값을 확인하고 <strong>현재 1RM</strong> 칸에 넣으면 앞으로의 104주가 전부 다시 계산됩니다. 스쿼트·벤치는 이미 아는 숫자니 그대로 진행하세요.'
-        : final
-        ? '마지막 블록입니다. 3회가 아니라 <strong>진짜 싱글</strong>을 칩니다. 오프너(90%) → 세컨드(95%) → 서드(100%) 순으로, 시합처럼 세 번만.'
-        : '지난 블록까지 12주 동안 무게를 더해 왔습니다. 계산상의 1RM이 실제와 벌어졌을 시점이라 여기서 맞춥니다. <strong>디로드 바로 다음 주</strong>라 몸이 가장 가벼운 타이밍입니다.';
-      var pd = [
-        {d:'월요일', l:'스쿼트', c:'25', w: first ? '측정 안 함 — 평소대로 진행' : (final ? '싱글: 90% → 95% → 100%' : '무거운 3회 1세트, RPE 9에서 정지')},
-        {d:'화요일', l:'벤치',   c:'20', w: first ? '측정 안 함 — 평소대로 진행' : (final ? '싱글: 90% → 95% → 100%' : '무거운 3회 1세트, RPE 9에서 정지')},
-        {d:'수요일', l:'데드리프트', c:'15', w: final ? '싱글: 90% → 95% → 100%' : '무거운 3회 1세트, RPE 9에서 정지'}
-      ];
-      $('wProtoDays').innerHTML = pd.map(function(x){
-        return '<div class="pday"><div class="d">'+x.d+'</div>'
-          + '<div class="l"><span class="chipdot" style="background:var(--p'+x.c+')"></span>'+x.l+'</div>'
-          + '<div class="w">'+x.w+'</div></div>';
-      }).join('');
-    }
+    /* 1RM 점검은 앱의 8주 점검(#assessment)과 AMRAP으로 대체 */
+    if ($('wTest')) $('wTest').hidden = true;
+    if ($('wBadge')) $('wBadge').hidden = true;
+    if ($('wNextTest')) $('wNextTest').innerHTML = '';
 
     /* 4주 파동 스트립 — 이번 주 퍼센트가 어디쯤인지 */
     $('wWave').innerHTML = WAVE.map(function(x, i){
       var cls = (i+1) === wib ? ' on' : ((i+1) < wib ? ' done' : '');
       return '<div class="w4cell'+cls+'">'
         + '<div class="wk">'+x.wk+' · '+x.label+'</div>'
-        + '<div class="pc">'+(Math.round(x.pct*1000)/10)+'%</div>'
-        + '<div class="sc">'+x.scheme+'</div>'
+        + '<div class="pc">'+Math.round(x.sets[x.sets.length-1][0]*100)+'%</div>'
+        + '<div class="sc">'+x.sets.map(function(s){return Math.round(s[0]*100);}).join('·')+'% · '+x.scheme+'</div>'
         + '</div>';
     }).join('');
 
     /* 무게가 나오는 식 — 출처를 숨기지 않는다 */
-    var proj = projected(v, block);
+    var added = function(k){ return tm[k] - r25(v[k]*0.9); };
     $('wFormula').innerHTML =
-      '<b>네가 입력한 1RM</b> <span>스쿼트 '+fmt(tm.sq)+' · 벤치 '+fmt(tm.bp)+' · 데드 '+fmt(tm.dl)+'</span>'
-      + '<em>×</em> <b>'+(Math.round(row.pct*1000)/10)+'%</b>'
-      + '<span>= 아래 무게. 이 숫자는 네가 직접 바꾸기 전까지 안 움직입니다.</span>'
-      + (proj.sq > tm.sq || proj.dl > tm.dl
-          ? '<span style="width:100%;color:var(--faint)">계획상 이 시점 목표는 스쿼트 '+fmt(proj.sq)+' · 벤치 '+fmt(proj.bp)+' · 데드 '+fmt(proj.dl)+' — 측정 주차에 확인해서 직접 올리세요.</span>'
-          : '');
+      '<b>기준값(TM)</b> <span>= 입력한 1RM × 90%' + (added('sq') > 0 || added('bp') > 0 ? ' + 사이클 증량' : '') + '</span>'
+      + '<span style="width:100%">스쿼트 <b>'+fmt(tm.sq)+'</b> · 벤치 <b>'+fmt(tm.bp)+'</b> · 데드 <b>'+fmt(tm.dl)+'</b> · OHP <b>'+fmt(tm.ohp)+'</b>'
+      + '  →  이번 주 '+row.sets.map(function(s){return Math.round(s[0]*100)+'%';}).join(' · ')+'</span>'
+      + '<span style="width:100%;color:var(--faint)">사이클이 끝날 때마다 스쿼트·데드 +5kg, 벤치·OHP +2.5kg. 1RM 칸이 바뀌면 그 값으로 다시 계산합니다.</span>';
 
     /* 메인 무게 카드 */
-    var names = {sq:'스쿼트', bp:'벤치', dl:'데드리프트'};
+    var names = {sq:'스쿼트', bp:'벤치', dl:'데드리프트', ohp:'OHP'};
+    var dayOf = {sq:'월', bp:'화', dl:'수', ohp:'목'};
     var cards = '';
-    ['sq','bp','dl'].forEach(function(k){
-      var kg = r25(tm[k] * row.pct);
-      var back = null;
+    ['sq','bp','dl','ohp'].forEach(function(k){
+      var plan = row.sets.map(function(s){ return {kg:r25(tm[k]*s[0]), reps:s[1], plus:!!s[2]}; });
+      var top = plan[plan.length-1];
+      var fslN = wib === 4 ? 0 : ({sq:5,bp:5,dl:3,ohp:5}[k]);
       cards += '<div class="lcard">'
-        + '<div class="top"><span class="chipdot '+k+'"></span>'+names[k]+'</div>'
-        + '<div class="sch">'+row.scheme+'</div>'
-        + '<div class="kg">'+fmt(kg)+'<em>kg</em></div>'
-        + '<span class="pl">'+plateHTML(kg)+'</span>'
-        + '<div class="sub">입력한 1RM <b>'+fmt(tm[k])+'kg</b> × '+(Math.round(row.pct*1000)/10)+'% = <b>'+fmt(kg)+'kg</b></div>'
+        + '<div class="top"><span class="chipdot '+k+'"'+(k==='ohp'?' style="background:var(--p10)"':'')+'></span>'+names[k]+' <span class="when" style="margin-left:auto">'+dayOf[k]+'요일</span></div>'
+        + '<div class="sch">'+plan.map(function(p){return fmt(p.kg)+'×'+p.reps+(p.plus?'+':'');}).join(' → ')+'</div>'
+        + '<div class="kg">'+fmt(top.kg)+'<em>kg × '+top.reps+(top.plus?'+':'')+'</em></div>'
+        + '<span class="pl">'+plateHTML(top.kg)+'</span>'
+        + (fslN ? '<div class="backoff">FSL · <b>'+fmt(plan[0].kg)+'kg</b> × 5회 × '+fslN+'세트</div>' : '')
+        + '<div class="sub">TM <b>'+fmt(tm[k])+'kg</b> × '+Math.round(row.sets[row.sets.length-1][0]*100)+'% · 1RM '+fmt(v[k])+'kg</div>'
         + '</div>';
     });
     $('wLifts').innerHTML = cards;
@@ -725,18 +737,25 @@
     var days = '';
     function exRow(e){
       var kg = '', cls = 'kgv', sch = '', sub = '';
-      var ns = e.sets ? e.sets[wib-1] : 0;
+      var ns = Array.isArray(e.sets) ? e.sets[wib-1] : 0;
       if (e.main){
-        kg = fmt(r25(tm[e.main] * row.pct)) + 'kg';
+        var pl = row.sets.map(function(s){ return r25(tm[e.main]*s[0]); });
+        kg = fmt(pl[pl.length-1]) + 'kg';
         sch = row.scheme;
+        sub = pl.map(fmt).join(' → ');
+      } else if (e.fsl){
+        if (wib === 4) return '';
+        sch = e.sets + '세트 × 5회';
+        kg = fmt(r25(tm[e.fsl]*row.sets[0][0])) + 'kg';
+        sub = '첫 세트 무게';
       } else {
         if (!ns) return '';
         sch = ns + '세트 × ' + e.reps + '회';
         if (e.pct){
-          var w = r25(tm[e.of] * e.pct);
+          var w = r25(v[e.of] * e.pct);   /* 보조 %는 1RM 기준 (TM은 메인·FSL 전용) */
           kg = fmt(wib === 4 ? r25(w * 0.85) : w) + 'kg';
         } else if (e.est){
-          var base = e.est[0] === 'bw' ? v.bw : tm[e.est[0]];
+          var base = e.est[0] === 'bw' ? v.bw : v[e.est[0]];
           var ew = r25(base * e.est[1]);
           if (wib === 4) ew = r25(ew * 0.85);
           kg = (e.est[2] === '+' ? '+' : '') + fmt(ew) + 'kg';
@@ -748,7 +767,7 @@
       var key = keyOf(e.n), tag = EX[key] ? 'button' : 'div';
       return '<'+tag+(tag === 'button' ? ' type="button" data-guide="'+key+'"' : '')
         + ' class="ex w3'+(e.main ? ' main' : '')+'"'
-        + (e.main ? ' style="--mc:var(--p'+({sq:'25',bp:'20',dl:'15'}[e.main])+')"' : '')+'>'
+        + (e.main ? ' style="--mc:var(--p'+({sq:'25',bp:'20',dl:'15',ohp:'10'}[e.main])+')"' : '')+'>'
         + '<span class="n">'+e.n+(e.tech ? '<i class="tech">'+e.tech+'</i>' : '')+'</span>'
         + '<span class="s">'+sch+'</span>'
         + '<span class="'+cls+'">'+kg+(sub ? '<em>'+sub+'</em>' : '')+'</span>'
@@ -759,7 +778,7 @@
       days += '<div class="day">'
         + '<div class="daytag">'+d.tag+' · '+DOW[d.dow]+'요일 · '+md(date)+'</div>'
         + '<h3>'+d.name+'</h3>'
-        + '<div class="tier"><b>근력</b><span>휴식 2~3분 · RPE 7~8</span></div>'
+        + '<div class="tier"><b>근력 · 5/3/1</b><span>휴식 2~3분 · 마지막 세트 +</span></div>'
         + '<div class="exlist">'+d.ex.filter(function(e){return e.tier==='s';}).map(exRow).join('')+'</div>'
         + '<div class="tier hyp"><b>근비대</b><span>휴식 45~90초 · 마지막 세트 실패까지</span></div>'
         + '<div class="exlist">'+d.ex.filter(function(e){return e.tier==='h';}).map(exRow).join('')+'</div>'
@@ -814,6 +833,31 @@
     $('wTitle').scrollIntoView({block:'nearest'});
   }
 
+  function switchPrompt(){
+    var box = $('wSwitch');
+    if (!box) return;
+    var done = false;
+    try{ done = localStorage.getItem('bigthree500.program') === '531'; }catch(e){}
+    box.hidden = done;
+    if (done) return;
+    box.innerHTML = '<b>프로그램이 5/3/1로 바뀌었습니다.</b> 기준값(TM)이 1RM의 90%로 다시 잡히고, 메인 종목은 3세트 + FSL로 바뀝니다. 새 사이클을 이번 주부터 1주차로 시작하는 걸 추천합니다.'
+      + '<div class="switch-actions"><button class="primary" data-switch="fresh">이번 주를 1주차로 시작</button>'
+      + '<button class="ghost" data-switch="keep">지금 주차 그대로</button></div>';
+    box.onclick = function(e){
+      var b = e.target.closest ? e.target.closest('[data-switch]') : null;
+      if (!b) return;
+      if (b.getAttribute('data-switch') === 'fresh'){
+        wState.start = iso(mondayOf(new Date())); wState.week = 1;
+        $('wStart').value = wState.start;
+        resetTmBase(); wSave();
+      }
+      try{ localStorage.setItem('bigthree500.program', '531'); }catch(err){}
+      box.hidden = true;
+      renderWeek(read());
+      document.dispatchEvent(new CustomEvent('training:week'));
+    };
+  }
+
   function initWeekTab(){
     wRestore();
     if (!wState.start){ wState.start = iso(mondayOf(new Date())); wSave(); }  /* 첫 방문에 시작일 고정 */
@@ -828,31 +872,10 @@
       goWeek(diff + 1);
     });
     $('wStart').addEventListener('change', function(){
-      wState.start = $('wStart').value; wSave(); renderWeek(read());
+      wState.start = $('wStart').value; wSave(); resetTmBase(); renderWeek(read());
       document.dispatchEvent(new CustomEvent('training:week'));
     });
-    function epCalc(){
-      var w = parseFloat($('epW').value), n = parseInt($('epR').value, 10);
-      if (!isFinite(w) || w <= 0 || !isFinite(n) || n < 1){ $('epOut').textContent = '—'; return null; }
-      var one = n === 1 ? w : w * (1 + n/30);
-      $('epOut').textContent = fmt(Math.round(one * 2) / 2);
-      return r25(one);
-    }
-    $('epW').addEventListener('input', epCalc);
-    $('epR').addEventListener('input', epCalc);
-    document.querySelector('.epapply').addEventListener('click', function(e){
-      var b = e.target.closest ? e.target.closest('[data-ap]') : null;
-      if (!b) return;
-      var val = epCalc();
-      if (val == null) return;
-      inputs[b.getAttribute('data-ap')].value = val;
-      render();
-      b.textContent = '적용됨 \u2713';
-      setTimeout(function(){
-        b.textContent = {sq:'스쿼트', bp:'벤치', dl:'데드리프트'}[b.getAttribute('data-ap')] + '에 적용';
-      }, 1600);
-    });
-    epCalc();
+    /* 12주 측정 계산기는 앱의 1RM 점검(#assessment)으로 대체됨 */
 
     $('wDaily').addEventListener('change', function(e){
       var el = e.target;
@@ -888,6 +911,7 @@
 
   restore();
   initWeekTab();
+  switchPrompt();
   ['sq','bp','dl','bw'].forEach(function(k){
     inputs[k].addEventListener('input', render);
     inputs[k].addEventListener('change', render);
@@ -897,6 +921,7 @@
   window.Training = {
     read: read, render: render, renderWeek: renderWeek,
     state: wState, days: DAYS, wave: WAVE, inputs: inputs,
-    goWeek: goWeek, saveWeek: wSave, plates: plateHTML, muscleSVG: muscleSVG
+    goWeek: goWeek, saveWeek: wSave, plates: plateHTML, muscleSVG: muscleSVG,
+    tmFor: function(week){ return tmFor(read(), week); }, cycleOf: cycleOf, realWeek: realWeek
   };
 })();

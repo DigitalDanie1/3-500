@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const T=window.Training,C=window.TrainingCore,G=window.ExerciseGuides,$=id=>document.getElementById(id);
-const KEY='bigthree500.training.v2', names={sq:'스쿼트',bp:'벤치',dl:'데드리프트'}, colors={sq:'var(--p25)',bp:'var(--p20)',dl:'var(--p15)'};
+const KEY='bigthree500.training.v2', names={sq:'스쿼트',bp:'벤치',dl:'데드리프트',ohp:'OHP'}, colors={sq:'var(--p25)',bp:'var(--p20)',dl:'var(--p15)',ohp:'var(--p10)'};
 const today=()=>C.iso(new Date());
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let data={version:2,sessions:{},measurements:[],postponed:{},bar:20}, active=null, selected=null, selectedWeek=null, testLift=null, timerEnd=null, pausedSeconds=null;
@@ -9,7 +9,9 @@ try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&saved.ve
 function status(message,error=false){$('save-status').textContent=message;$('save-status').classList.toggle('failure',error);}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(data));status('이 기기에 저장됨 · 다른 기기와 자동 동기화되지 않습니다.');return true;}catch(e){status('저장 공간에 기록하지 못했습니다. 창을 닫기 전에 기록을 백업하세요.',true);return false;}}
 function weekInfo(){const w=T.state.week;const mon=C.add(T.state.start,(w-1)*7);return {w,mon,wib:(w-1)%4+1,wave:T.wave[(w-1)%4]};}
-function exercises(day){return T.days[day].ex.map(e=>({...e}));}
+function tmNow(){const info=weekInfo();return T.tmFor?T.tmFor(info.w):null;}
+function rx(e){const info=weekInfo();return C.prescription(e,info.wave,info.wib,T.read(),tmNow());}
+function exercises(day){return T.days[day].ex.map(e=>({...e})).filter(e=>rx(e).sets>0);}
 function sessionAt(day,date){return data.sessions[`${date}:${day}`];}
 function pickDay(){const info=weekInfo();if(selectedWeek!==info.w){selected=null;selectedWeek=info.w;}
 if(selected!==null)return selected;
@@ -20,31 +22,31 @@ return i<0?0:i;
 function dayMain(d){const e=(d.ex||[]).find(x=>x.main);return e?e.main:null;}
 function dayColor(d){const m=dayMain(d);return m?colors[m]:'var(--p25)';}
 function renderToday(){
-const info=weekInfo(),idx=pickDay(),day=T.days[idx],date=C.add(info.mon,day.dow),first=exercises(idx)[0],p=C.prescription(first,info.wave,info.wib,T.read()),s=sessionAt(idx,date);
+const info=weekInfo(),idx=pickDay(),day=T.days[idx],date=C.add(info.mon,day.dow),first=exercises(idx)[0],p=rx(first),s=sessionAt(idx,date);
 const dayNames=['월','화','수','목','금','토','일'];
 const isToday=date===today(),past=date<today(),complete=s?.completed;
 const tmr=C.add(today(),1);
 const tIdx=T.days.findIndex(d=>C.add(info.mon,d.dow)===tmr);
 let tomorrowHTML='';
 if(tIdx>=0){
-  const td=T.days[tIdx],tf=exercises(tIdx)[0],tp=C.prescription(tf,info.wave,info.wib,T.read()),ts=sessionAt(tIdx,tmr);
+  const td=T.days[tIdx],tf=exercises(tIdx)[0],tp=rx(tf),ts=sessionAt(tIdx,tmr);
   tomorrowHTML=`<button class="tomorrow" data-action="pick-day" data-day="${tIdx}" style="--session-color:${dayColor(td)}">
     <span class="tomorrow-when">내일 · ${tmr.slice(5).replace('-','.')} (${dayNames[td.dow]})</span>
     <span class="tomorrow-name">${td.name}</span>
-    <span class="tomorrow-detail">${tf.n} ${tp.kg??''}${tp.kg?'kg':''} · ${tp.sets}세트 × ${tp.reps}회 · 총 ${exercises(tIdx).length}종목${ts?.completed?' · 완료':''}</span>
+    <span class="tomorrow-detail">${tf.n} ${tp.kg??''}${tp.kg?'kg':''} × ${tp.reps}${tp.plan&&tp.plan.at(-1).amrap?'+':''}${tp.plan?'':` · ${tp.sets}세트`} · 총 ${exercises(tIdx).length}종목${ts?.completed?' · 완료':''}</span>
   </button>`;
 } else {
   tomorrowHTML=`<div class="tomorrow rest"><span class="tomorrow-when">내일 · ${tmr.slice(5).replace('-','.')}</span><span class="tomorrow-name">헬스장 밖</span><span class="tomorrow-detail">걷기 30~40분 · 모빌리티 15분 · 맨몸 코어</span></div>`;
 }
 $('today').innerHTML=`<div class="today-top"><span>${today().replaceAll('-','.')} · ${info.w}주차</span><button class="ghost" data-action="current-week">이번 주</button></div>
-<div class="today-card${isToday&&!complete?' is-today':''}" style="--session-color:${dayColor(day)}">${isToday&&!complete?'<div class="today-badge">오늘 해야 할 것</div>':''}<div class="helper">${complete?'완료한 세션':isToday?'오늘의 운동':past?'선택한 세션':'다음 운동'} · ${date.replaceAll('-','.')} (${dayNames[day.dow]})</div><h1>${day.name}</h1><div class="lead-weight">${p.kg??'—'}<small>kg · ${p.sets}세트 × ${p.reps}회</small></div><p>${!isToday&&!past?'오늘은 예정된 훈련일이 아닙니다. 다음 세션을 미리 확인하거나 운동일을 바꿀 수 있어요.':`${first.n}부터 시작 · ${exercises(idx).length}개 운동 · ${info.wib===4?'회복 주차':'본세트 사이 휴식 3분'}`}</p><div class="actions"><button class="primary" data-action="start" data-day="${idx}">${s?'기록 이어보기':'운동 시작'}</button><button class="ghost" data-guide="${first.n}">동작 배우기</button></div></div>
+<div class="today-card${isToday&&!complete?' is-today':''}" style="--session-color:${dayColor(day)}">${isToday&&!complete?'<div class="today-badge">오늘 해야 할 것</div>':''}<div class="helper">${complete?'완료한 세션':isToday?'오늘의 운동':past?'선택한 세션':'다음 운동'} · ${date.replaceAll('-','.')} (${dayNames[day.dow]})</div><h1>${day.name}</h1><div class="lead-weight">${p.kg??'—'}<small>kg × ${p.reps}${p.plan&&p.plan.at(-1).amrap?'+':''}${p.plan?'':` · ${p.sets}세트`}</small></div>${p.plan?`<p class="ramp">${p.plan.map(x=>`${x.kg}×${x.reps}${x.amrap?'+':''}`).join(' → ')}${info.wib!==4?' · 이어서 FSL':''}</p>`:''}<p>${!isToday&&!past?'오늘은 예정된 훈련일이 아닙니다. 다음 세션을 미리 확인하거나 운동일을 바꿀 수 있어요.':`${first.n}부터 시작 · ${exercises(idx).length}개 운동 · ${info.wib===4?'회복 주차':'본세트 사이 휴식 3분'}`}</p><div class="actions"><button class="primary" data-action="start" data-day="${idx}">${s?'기록 이어보기':'운동 시작'}</button><button class="ghost" data-guide="${first.n}">동작 배우기</button></div></div>
 ${tomorrowHTML}
 <div class="day-picker" aria-label="세션 선택">${T.days.map((d,i)=>`<button data-action="pick-day" data-day="${i}" aria-pressed="${i===idx}"${C.add(info.mon,d.dow)===today()?' data-is-today="1"':''}>${dayNames[d.dow]} · ${sessionAt(i,C.add(info.mon,d.dow))?.completed?'완료':d.name}</button>`).join('')}</div><div id="session-editor" class="session-editor"></div>`;
 if(active) renderSession();
 }
 function startSession(idx){
 const info=weekInfo(),date=C.add(info.mon,T.days[idx].dow),key=`${date}:${idx}`;
-if(!data.sessions[key]){data.sessions[key]={date,day:idx,week:info.w,completed:false,startedAt:Date.now(),exercises:exercises(idx).map(e=>{const p=C.prescription(e,info.wave,info.wib,T.read());return {name:e.n,alternate:e.alternate||null,main:e.main||null,kg:p.kg,sets:p.sets,reps:p.reps,warm:{},rows:Array.from({length:p.sets},(_,ri)=>({kg:p.kg??'',reps:p.reps,rpe:'',done:false,amrap:!!(e.main&&info.wave.amrap&&ri===p.sets-1)}))};})};save();}
+if(!data.sessions[key]){data.sessions[key]={date,day:idx,week:info.w,completed:false,startedAt:Date.now(),exercises:exercises(idx).map(e=>{const p=rx(e);return {name:e.n,alternate:e.alternate||null,main:e.main||null,kg:p.kg,sets:p.sets,reps:p.reps,warm:{},rows:p.plan?p.plan.map(x=>({kg:x.kg,reps:x.reps,rpe:'',done:false,amrap:x.amrap,min:x.reps})):Array.from({length:p.sets},(_,ri)=>({kg:p.kg??'',reps:p.reps,rpe:'',done:false,amrap:!!(e.main&&info.wave.amrap&&ri===p.sets-1)}))};})};save();}
 active=key;renderSession();renderLog();$('session-editor').scrollIntoView({block:'start'});
 }
 function unitFor(name){return name==='중량 턱걸이'?'추가 중량 · 맨몸은 0kg':name.includes('덤벨')||name==='불가리안 스플릿 스쿼트'?'덤벨 한 손 기준':name==='앱 롤아웃'?'추가 중량 · 맨몸은 0kg':'바벨은 바 포함 총중량 · 기계는 표시 중량';}
@@ -83,9 +85,10 @@ const x=d=>48+((+C.date(d)-minDate)/Math.max(86400000,maxDate-minDate))*480,y=v=
 for(const k of Object.keys(names)){const rows=ms.filter(m=>m.lift===k);if(!rows.length)continue;graph+=`<polyline fill="none" stroke="${colors[k]}" stroke-width="2" points="${rows.map(m=>`${x(m.date)},${y(m.value)}`).join(' ')}"/>`+rows.map(m=>`<circle cx="${x(m.date)}" cy="${y(m.value)}" r="4" fill="${m.kind==='actual'?colors[k]:'var(--bg)'}" stroke="${colors[k]}" stroke-width="2"><title>${names[k]} ${m.date} ${m.value}kg ${m.kind==='actual'?'실측':'추정'}</title></circle>`).join('');}
 h.innerHTML=`<h2>실제 기록의 변화</h2><div class="history-legend">${Object.keys(names).map(k=>`<span style="color:${colors[k]}">${names[k]}</span>`).join('')}<span>채움: 실측 · 빈 원: 추정</span></div><svg class="history-chart" viewBox="0 0 580 240" role="img" aria-label="날짜별 종목 기록. 아래 표에서 정확한 값을 확인할 수 있습니다."><path d="M48 24 V200 H540" fill="none" stroke="var(--line-strong)"/><text x="8" y="32" fill="var(--muted)" font-size="12">${Math.round(max)}kg</text><text x="24" y="205" fill="var(--muted)" font-size="12">0</text>${graph}<text x="48" y="228" fill="var(--muted)" font-size="12">${ms[0].date}</text><text x="540" y="228" text-anchor="end" fill="var(--muted)" font-size="12">${ms.at(-1).date}</text></svg><div class="history-table"><table><thead><tr><th>날짜</th><th>종목</th><th>기록</th><th>구분</th><th>입력 세트</th></tr></thead><tbody>${ms.slice(-12).reverse().map(m=>`<tr><td>${m.date}</td><td>${names[m.lift]}</td><td>${m.value}kg</td><td>${m.kind==='actual'?'실측':'추정'}</td><td>${m.kg}kg × ${m.reps}</td></tr>`).join('')}</tbody></table></div><p class="helper">최근 12개 기록 표시 · 추정값과 실측값을 구분해 비교하세요.</p>`;
 }
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-reset-lift]');if(!b)return;const k=b.dataset.resetLift,nv=Math.round(T.read()[k]*0.9/2.5)*2.5;T.inputs[k].value=nv;T.render();$('session-feedback').textContent=`${names[k]} 1RM ${nv}kg로 낮췄습니다. 다음 세션부터 적용됩니다.`;});
 document.addEventListener('training:week',()=>{selected=null;selectedWeek=null;render();});
 function render(){document.querySelector('.brandsub').textContent=`빅3 합계 · 체중 ${T.read().bw}kg`;renderToday();renderAssessment();renderHistory();renderLog();addLegacyGuides();if(T.state.week===1&&latest('dl')){$('wBanner').textContent='현재 입력한 1RM 기준으로 계산합니다. 기록을 갱신하기 전 시작한 세션은 당시 계획 중량을 유지합니다.';}}
-function addLegacyGuides(){document.querySelectorAll('#wDays .ex .n, #pane-plan .ex .n').forEach(el=>{if(el.querySelector('button'))return;const name=el.textContent;const aliases={};if(G[name]||aliases[name])el.innerHTML=`<button class="ghost" style="text-align:left;padding:4px 0;border:0;text-decoration:underline;text-underline-offset:4px" data-guide="${aliases[name]||name}">${name}</button>`;});}
+function addLegacyGuides(){document.querySelectorAll('#wDays .ex .n, #pane-plan .ex .n').forEach(el=>{if(el.querySelector('button')||el.closest('[data-guide]'))return;const name=el.textContent;const aliases={};if(G[name]||aliases[name])el.innerHTML=`<button class="ghost" style="text-align:left;padding:4px 0;border:0;text-decoration:underline;text-underline-offset:4px" data-guide="${aliases[name]||name}">${name}</button>`;});}
 function renderLog(){let host=$('session-log');if(!host){host=document.createElement('section');host.id='session-log';host.className='assessment';$('assessment').after(host);}const rows=Object.entries(data.sessions).sort((a,b)=>b[1].date.localeCompare(a[1].date)||b[1].startedAt-a[1].startedAt).slice(0,8);host.innerHTML=`<h2>운동 기록</h2>${rows.length?rows.map(([key,s])=>`<div class="test-row"><div><strong>${s.date} · ${T.days[s.day].name}</strong><small>${s.completed?'완료':'기록 중'} · ${s.exercises.reduce((n,e)=>n+e.rows.filter(r=>r.done).length,0)}세트 기록</small></div><button class="ghost" data-action="open-log" data-key="${esc(key)}">열기</button></div>`).join(''):'<p>운동을 시작하면 세트 기록이 여기에 모입니다.</p>'}<button class="ghost" data-action="backup">기록 백업</button>`;}
 function startTimer(seconds){timerEnd=Date.now()+seconds*1000;pausedSeconds=null;paintTimer();}
 function paintTimer(){const h=$('rest-timer');if(timerEnd===null&&pausedSeconds===null){h.hidden=true;return;}h.hidden=false;const remain=pausedSeconds??Math.max(0,Math.ceil((timerEnd-Date.now())/1000));h.innerHTML=`<span>${pausedSeconds!==null?'일시정지':remain?'세트 사이 휴식':'휴식 완료'}</span><output aria-label="남은 휴식 시간">${String(Math.floor(remain/60)).padStart(2,'0')}:${String(remain%60).padStart(2,'0')}</output><button data-action="timer-pause">${pausedSeconds!==null?'계속':'정지'}</button><button data-action="timer-add">+30초</button><button data-action="timer-close">닫기</button>`;}
@@ -118,10 +121,12 @@ if(el.dataset.work!==undefined){if(el.value!==''&&!el.checkValidity()){el.report
 if(el.dataset.row){const [ei,ri,k]=el.dataset.row.split(':');if(!el.checkValidity()){el.reportValidity();return;}s.exercises[ei].rows[ri][k]=el.value===''?'':+el.value;s.exercises[ei].rows[ri].done=false;s.completed=false;const check=document.querySelector(`[data-done="${ei}:${ri}"]`);if(check)check.checked=false;save();updateCount();}
 if(el.dataset.warm){const [ei,i]=el.dataset.warm.split(':');s.exercises[ei].warm[i]=el.checked;save();}
 if(el.dataset.done){const [ei,ri]=el.dataset.done.split(':'),r=s.exercises[ei].rows[ri];if(el.checked&&(r.kg===''||r.reps===''||r.rpe===''||r.kg<0||r.kg>500||r.reps<1||r.reps>50||r.rpe<1||r.rpe>10)){el.checked=false;$('session-feedback').textContent='중량·횟수·RPE를 모두 입력한 뒤 완료하세요.';return;}r.done=el.checked;s.completed=false;save();updateCount();if(el.checked)startTimer(s.exercises[ei].main?180:90);
-if(el.checked&&r.amrap){const lift=s.exercises[ei].main,est=C.amrap(+r.kg,+r.reps),cur=T.read()[lift];
- if(est&&est>cur){T.inputs[lift].value=est;data.measurements.push({lift,date:s.date,kind:'estimate',source:'amrap',kg:+r.kg,reps:+r.reps,value:est,createdAt:Date.now()});delete data.postponed[lift];save();T.render();
-  $('session-feedback').innerHTML=`<b>${names[lift]} 1RM ${cur} → ${est}kg로 올렸습니다.</b> ${r.kg}kg × ${r.reps}회 기준. 다음 세션부터 새 무게로 계산됩니다.`;}
- else if(est){$('session-feedback').textContent=`${names[lift]} ${r.kg}kg × ${r.reps}회 → 추정 ${est}kg. 현재 기준 ${cur}kg보다 높지 않아 유지합니다.`;}}
+if(el.checked&&r.amrap){const lift=s.exercises[ei].main,est=C.amrap(+r.kg,+r.reps),tmv=(tmNow()||{})[lift],cur=tmv?Math.round(tmv/0.9/2.5)*2.5:T.read()[lift],one=T.read()[lift];
+ if(r.min&&+r.reps<r.min){$('session-feedback').innerHTML=`<b>${names[lift]} 최소 ${r.min}회를 못 채웠습니다.</b> 5/3/1 규칙상 기준값을 10% 낮춰서 다시 쌓는 게 맞습니다. <button class="ghost" data-reset-lift="${lift}">기준값 10% 낮추기</button>`;}
+ else if(est&&est>cur){T.inputs[lift].value=est;data.measurements.push({lift,date:s.date,kind:'estimate',source:'amrap',kg:+r.kg,reps:+r.reps,value:est,createdAt:Date.now()});delete data.postponed[lift];save();T.render();
+  $('session-feedback').innerHTML=`<b>${names[lift]} 1RM ${one} → ${est}kg로 올렸습니다.</b> ${r.kg}kg × ${r.reps}회 기준. 다음 세션부터 새 기준값으로 계산됩니다.`;}
+ else if(est){$('session-feedback').textContent=`${names[lift]} ${r.kg}kg × ${r.reps}회 → 추정 ${est}kg. 지금 기준값이 가리키는 ${cur}kg보다 높지 않아 유지합니다.`;}}
+
 }
 });
 function updateCount(){const s=data.sessions[active];if(!s)return;$('session-count').textContent=`${s.exercises.reduce((n,e)=>n+e.rows.filter(r=>r.done).length,0)} / ${s.exercises.reduce((n,e)=>n+e.rows.length,0)}세트`;}
