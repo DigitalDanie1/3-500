@@ -28,7 +28,9 @@ const isToday=date===today(),past=date<today(),complete=s?.completed;
 const tmr=C.add(today(),1);
 const tIdx=T.days.findIndex(d=>C.add(info.mon,d.dow)===tmr);
 let tomorrowHTML='';
-if(tIdx>=0){
+if(T.state.start&&tmr<T.state.start){
+  tomorrowHTML=`<div class="tomorrow rest"><span class="tomorrow-when">내일 · ${tmr.slice(5).replace('-','.')}</span><span class="tomorrow-name">새 플랜 시작 전</span><span class="tomorrow-detail">가벼운 걷기 · 모빌리티 · 식단 기록 시작 — 새 플랜은 ${T.state.start.slice(5).replace('-','.')} (월)부터</span></div>`;
+} else if(tIdx>=0){
   const td=T.days[tIdx],tf=exercises(tIdx)[0],tp=rx(tf),ts=sessionAt(tIdx,tmr);
   tomorrowHTML=`<button class="tomorrow" data-action="pick-day" data-day="${tIdx}" style="--session-color:${dayColor(td)}">
     <span class="tomorrow-when">내일 · ${tmr.slice(5).replace('-','.')} (${dayNames[td.dow]})</span>

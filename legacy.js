@@ -3,17 +3,17 @@
   var KEY = 'bigthree500.v1';
 
   var LIFTS = [
-    {k:'sq', name:'스쿼트',    target:180, def:130},
-    {k:'bp', name:'벤치',      target:120, def:100},
-    {k:'dl', name:'데드리프트', target:200, def:160},
+    {k:'sq', name:'스쿼트',    target:180, def:140},
+    {k:'bp', name:'벤치',      target:120, def:105},
+    {k:'dl', name:'데드리프트', target:200, def:135},
     {k:'ohp', name:'OHP', target:0, def:65}
   ];
 
   var PHASES = [
-    {lab:'페이즈 1', sub:'1~6개월 · 79kg',   sq:145,   bp:107.5, dl:172.5, bw:79},
-    {lab:'페이즈 2', sub:'7~12개월 · 81kg',  sq:157.5, bp:112.5, dl:185,   bw:81},
-    {lab:'페이즈 3', sub:'13~18개월 · 83kg', sq:167.5, bp:115,   dl:197.5, bw:83},
-    {lab:'페이즈 4', sub:'19~24개월 · 84kg', sq:180,   bp:120,   dl:200,   bw:84}
+    {lab:'페이즈 1', sub:'2027.04 · 79kg', sq:152.5, bp:110,   dl:155, bw:79},
+    {lab:'페이즈 2', sub:'2027.10 · 81kg', sq:162.5, bp:115,   dl:170, bw:81},
+    {lab:'페이즈 3', sub:'2028.04 · 83kg', sq:172.5, bp:117.5, dl:185, bw:83},
+    {lab:'페이즈 4', sub:'2028.10 · 84kg', sq:180,   bp:120,   dl:200, bw:84}
   ];
 
   /* 5/3/1 — 퍼센트는 1RM이 아니라 기준값(TM = 1RM × 90%) 대비.
@@ -151,12 +151,14 @@
     });
     $('waveBody').innerHTML = w;
 
-    $('fProtein').textContent = Math.round(v.bw * 2) + ' g';
-    $('fCalHi').textContent = (Math.round(v.bw * 39 / 50) * 50).toLocaleString();
-    $('fCalLo').textContent = (Math.round(v.bw * 34.5 / 50) * 50).toLocaleString();
+    var nt = window.Nutrition ? window.Nutrition.targets() : {protein:Math.round(v.bw*2), train:Math.round(v.bw*38/50)*50, rest:Math.round(v.bw*33.5/50)*50};
+    $('fProtein').textContent = nt.protein + ' g';
+    $('fCalHi').textContent = nt.train.toLocaleString();
+    $('fCalLo').textContent = nt.rest.toLocaleString();
 
     save(v);
     renderWeek(v);
+    if (window.Nutrition) window.Nutrition.render();
   }
 
 
@@ -538,10 +540,10 @@
       {n:'삼두 + 이두 슈퍼셋', reps:12, sets:[3,4,4,2], tech:'슈퍼셋', note:'2회 남기고', tier:'h'},
       {n:'시티드 카프 레이즈', reps:15, sets:[3,4,4,2], est:['bw',0.35], tier:'h'}
      ]},
-    {tag:'DAY 5', dow:4, name:'하체 볼륨 · 약점', sub:'스쿼트·데드 2회차 + 둔근·햄',
+    {tag:'DAY 5', dow:4, name:'하체 볼륨 · 약점', sub:'데드 연습 + 스쿼트 2회차 + 둔근·햄',
      ex:[
       {n:'프론트 스쿼트', reps:5, sets:[4,4,4,2], pct:0.55, of:'sq', tier:'s'},
-      {n:'데피싯 데드리프트', reps:4, sets:[4,4,4,2], pct:0.60, of:'dl', tier:'s'},
+      {n:'멈춤 데드리프트', reps:3, sets:[5,5,5,2], pct:0.65, of:'dl', tier:'s'},
       {n:'불가리안 스플릿 스쿼트', reps:10, sets:[3,3,4,2], est:['bw',0.20], note:'덤벨 한쪽', tier:'h'},
       {n:'힙 쓰러스트', reps:12, sets:[3,4,4,2], est:['sq',0.65], tier:'h'},
       {n:'라잉 레그컬', reps:15, sets:[3,3,4,2], est:['bw',0.33], tier:'h'},
@@ -695,7 +697,9 @@
     else if (wib === 3) msg = '<b>5/3/1 주.</b> 사이클에서 가장 무거운 주입니다. 마지막 세트는 1번만 들어도 되지만, <b>되는 만큼 계속 드세요.</b>';
     else if (wib === 1 && cyc > 1) msg = '<b>사이클 ' + cyc + ' 시작.</b> 기준값이 한 단계 올라갔습니다. 무게가 지난 사이클보다 높은 게 정상입니다.';
     else msg = '<b>한계는 네가 정하지 않는다.</b> 메인 종목의 <b>마지막 세트는 &lsquo;최대한&rsquo;</b> — 정해진 횟수가 없어. 자세가 무너지기 직전까지 들고, 실제로 든 횟수를 적으면 돼. 그 기록이 지금보다 높은 1RM을 가리키면 앱이 <b>자동으로 올립니다</b>.';
-    if (future) msg += ' <span style="color:var(--faint)">(미래 주차 — 사이클 증량만 반영한 예상치이고, 실제 기록에 따라 달라집니다.)</span>';
+    var st0 = parseISO(wState.start);
+    if (st0 && new Date() < st0) msg = '<b>새 플랜은 '+(st0.getMonth()+1)+'월 '+st0.getDate()+'일(월) 시작.</b> 남은 이번 주는 가볍게 걷기·모빌리티만 하고, <b>식단 탭</b>에서 먹는 것부터 기록해 두세요.';
+    else if (future) msg += ' <span style="color:var(--faint)">(미래 주차 — 사이클 증량만 반영한 예상치이고, 실제 기록에 따라 달라집니다.)</span>';
     $('wBanner').innerHTML = msg;
     $('wBanner').hidden = !msg;
 
@@ -842,25 +846,29 @@
     $('wTitle').scrollIntoView({block:'nearest'});
   }
 
+  /* 새 플랜(2026-10-19 시작, 실제 기록) — 한 번만 묻는다 */
+  var PLAN_ID = 'plan-20261019', PLAN_START = '2026-10-19', PLAN_REC = {sq:140, bp:105, dl:135};
   function switchPrompt(){
     var box = $('wSwitch');
     if (!box) return;
     var done = false;
-    try{ done = localStorage.getItem('bigthree500.program') === '531'; }catch(e){}
+    try{ done = localStorage.getItem('bigthree500.program') === PLAN_ID; }catch(e){}
     box.hidden = done;
     if (done) return;
-    box.innerHTML = '<b>프로그램이 5/3/1로 바뀌었습니다.</b> 기준값(TM)이 1RM의 90%로 다시 잡히고, 메인 종목은 3세트 + 가벼운 반복으로 바뀝니다. 새 사이클을 이번 주부터 1주차로 시작하는 걸 추천합니다.'
-      + '<div class="switch-actions"><button class="primary" data-switch="fresh">이번 주를 1주차로 시작</button>'
-      + '<button class="ghost" data-switch="keep">지금 주차 그대로</button></div>';
+    box.innerHTML = '<b>새 플랜 — 10월 19일(월)부터 1주차.</b> 1RM 칸을 실제 기록으로 맞추고(스쿼트 140 · 벤치 105 · 데드 135), 기준값을 다시 잡습니다. 지금까지 남긴 운동 기록은 그대로 남아요.'
+      + '<div class="switch-actions"><button class="primary" data-switch="fresh">새 플랜으로 시작</button>'
+      + '<button class="ghost" data-switch="keep">지금 설정 그대로</button></div>';
     box.onclick = function(e){
       var b = e.target.closest ? e.target.closest('[data-switch]') : null;
       if (!b) return;
       if (b.getAttribute('data-switch') === 'fresh'){
-        wState.start = iso(mondayOf(new Date())); wState.week = 1;
+        ['sq','bp','dl'].forEach(function(k){ inputs[k].value = PLAN_REC[k]; });
+        wState.start = PLAN_START; wState.week = 1;
         $('wStart').value = wState.start;
         resetTmBase(); wSave();
+        render();
       }
-      try{ localStorage.setItem('bigthree500.program', '531'); }catch(err){}
+      try{ localStorage.setItem('bigthree500.program', PLAN_ID); }catch(err){}
       box.hidden = true;
       renderWeek(read());
       document.dispatchEvent(new CustomEvent('training:week'));
@@ -896,6 +904,7 @@
     });
 
     var tabs = [{b:$('tabPlan'), p:$('pane-plan')}, {b:$('tabWeek'), p:$('pane-week')}];
+    if ($('tabFood') && $('pane-food')) tabs.push({b:$('tabFood'), p:$('pane-food')});
     function select(i){
       tabs.forEach(function(t, j){
         t.b.setAttribute('aria-selected', i === j ? 'true' : 'false');
@@ -914,14 +923,14 @@
       });
     });
     var saved = 1;   /* 기본값: 주간 실행 — 열면 오늘 훈련이 먼저 보인다 */
-    try{ var t = localStorage.getItem('bigthree500.tab'); if (t !== null) saved = parseInt(t,10) === 0 ? 0 : 1; }catch(e){}
+    try{ var t = localStorage.getItem('bigthree500.tab'); if (t !== null){ var tn = parseInt(t,10); saved = (tn >= 0 && tn < tabs.length) ? tn : 1; } }catch(e){}
     select(saved);
   }
 
   restore();
   initWeekTab();
   switchPrompt();
-  ['sq','bp','dl','bw'].forEach(function(k){
+  ['sq','bp','dl','ohp','bw'].forEach(function(k){
     inputs[k].addEventListener('input', render);
     inputs[k].addEventListener('change', render);
   });

@@ -45,6 +45,11 @@
   "모빌리티 (고관절·흉추·발목)": {en:"Mobility Work", target:"척추기립근 · 둔근", sub:"햄스트링 · 종아리", steps:["고관절: 90/90", "카우치 스트레치", "흉추: 폼롤러 신전", "오픈북", "발목: 벽에 무릎 밀기 (뒤꿈치 고정)"], cue:"고관절: 90/90", avoid:"반동으로 튕기는 것 / 아픈 지점까지 밀어붙이는 것", easy:"가벼운 스트레칭", why:"스쿼트 깊이와 데드 시작 자세는 힘이 아니라 가동범위 문제인 경우가 많습니다.", p:["erector", "glute"], s:["ham", "calf"], source:"https://www.acefitness.org/resources/everyone/exercise-library/"},
   "플랭크 + 레그레이즈": {en:"Plank + Leg Raise", target:"복근", sub:"척추기립근 · 둔근", steps:["플랭크는 골반을 살짝 말아 60초", "레그레이즈는 허리를 바닥에 붙인 채", "호흡을 멈추지 않는다"], cue:"플랭크는 골반을 살짝 말아 60초", avoid:"플랭크에서 엉덩이가 뜨거나 처지는 것 / 레그레이즈에서 허리가 뜨는 것", easy:"무릎 대고 플랭크", why:"훈련하지 않는 이틀 동안 코어만은 유지합니다.", p:["abs"], s:["erector", "glute"], source:"https://www.acefitness.org/resources/everyone/exercise-library/"},
   };
+  G['멈춤 데드리프트'] = {en:'Paused Deadlift', target:'척추기립근 · 둔근 · 햄스트링', sub:'광배근 · 대퇴사두 · 전완',
+    steps:['평소처럼 바를 정강이에 붙이고 등을 편 채 시작','바가 무릎 바로 아래에 왔을 때 1~2초 완전히 멈춘다','멈춘 자세 그대로 다시 끝까지 세운다 — 매 회 바닥에 내려놓고 다시 시작'],
+    cue:'멈춘 순간 등이 말리지 않고 바가 몸에 붙어 있어야 한다', avoid:'멈출 때 엉덩이가 먼저 올라가는 것 / 바가 몸에서 떨어지는 것', easy:'멈춤 없이 가벼운 무게로 일반 데드리프트',
+    why:'데드가 스쿼트보다 낮은 건 자세를 덜 익혔다는 뜻입니다. 무릎 아래에서 멈추면 가장 약한 구간의 자세를 매 회 연습하게 돼서, 3대 중 가장 빨리 오를 데드리프트를 끌어올립니다.',
+    p:['erector','glute','ham'], s:['lat','quad','forearm'], source:'https://www.acefitness.org/resources/everyone/exercise-library/'};
   /* 가벼운 반복 (원래 이름 FSL, First Set Last) — 메인 종목의 1세트 무게로 5×5. 동작은 메인과 같다. */
   [['백스쿼트 (가벼운 반복)','백스쿼트'],['벤치프레스 (가벼운 반복)','벤치프레스'],['데드리프트 (가벼운 반복)','데드리프트'],['오버헤드 프레스 (가벼운 반복)','오버헤드 프레스']].forEach(function(p){
     if (!G[p[1]]) return;

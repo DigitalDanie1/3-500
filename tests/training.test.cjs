@@ -2,7 +2,7 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 const C=require('../core.js');
 const {JSDOM}=require('jsdom');
 const dir=path.join(__dirname,'..');
-function boot(storage={}){const dom=new JSDOM(fs.readFileSync(path.join(dir,'index.html'),'utf8'),{url:'https://example.test',runScripts:'outside-only'});const w=dom.window;w.HTMLElement.prototype.scrollIntoView=function(){};w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};for(const [k,v] of Object.entries(storage))w.localStorage.setItem(k,JSON.stringify(v));for(const file of ['core.js','guides.js','legacy.js','app.js'])w.eval(fs.readFileSync(path.join(dir,file),'utf8'));return dom;}
+function boot(storage={}){const dom=new JSDOM(fs.readFileSync(path.join(dir,'index.html'),'utf8'),{url:'https://example.test',runScripts:'outside-only'});const w=dom.window;w.HTMLElement.prototype.scrollIntoView=function(){};w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};for(const [k,v] of Object.entries(storage))w.localStorage.setItem(k,JSON.stringify(v));for(const file of ['core.js','guides.js','legacy.js','app.js','food.js'])w.eval(fs.readFileSync(path.join(dir,file),'utf8'));return dom;}
 function click(w,s){const el=w.document.querySelector(s);assert.ok(el,'Missing '+s);el.click();}
 function change(w,s,value){const el=w.document.querySelector(s);assert.ok(el,'Missing '+s);el.value=value;el.dispatchEvent(new w.Event('change',{bubbles:true}));}
 test('warmups stay below work, use loadable steps and handle light bars',()=>{assert.deepEqual(C.warmup(90).map(x=>[x.kg,x.reps]),[[20,8],[35,5],[52.5,3],[70,1]]);assert.deepEqual(C.warmup(20),[]);for(const bar of [15,20])for(let kg=bar;kg<=300;kg+=2.5){const r=C.warmup(kg,bar);assert.ok(r.every((x,i)=>x.kg<kg&&x.kg>=bar&&x.kg%2.5===0&&(!i||x.kg>r[i-1].kg)));}assert.equal(C.warmup(112.5,20,true)[0].kg,40);});
@@ -65,4 +65,33 @@ test('AMRAP last set raises the baseline, flags missed minimums, and skips deloa
     const data=JSON.parse(rw.localStorage.getItem('bigthree500.training.v2'));
     assert.ok(!Object.values(data.sessions).at(-1).exercises.some(e=>/가벼운 반복/.test(e.name)));
   }finally{rw.close();}
+});
+
+test('식단: 목표 계산, 음식 담기, 추천 식단, 체중으로 레일 갱신, 정체 시 +150 제안',()=>{
+  const dom=boot({'bigthree500.v1':{sq:140,bp:105,dl:135,ohp:65,bw:76}}),w=dom.window;
+  try{
+    const Nu=w.Nutrition;
+    assert.deepEqual({...Nu.targets()},{train:2900,rest:2550,protein:152,tdee:2625,bmr:1694});
+    assert.equal(w.document.getElementById('fCalHi').textContent,'2,900');
+    Nu._setView('2026-10-19');
+    click(w,'[data-add="lunch"]');
+    assert.equal(w.document.getElementById('food-dialog').open,true);
+    click(w,'[data-pick="치킨라이스"]');click(w,'[data-mult="1.5"]');click(w,'[data-act="confirm"]');
+    let st=Nu._state();assert.equal(st.days['2026-10-19'].lunch[0].q,1.5);
+    assert.match(w.document.getElementById('pane-food').textContent,/630 \/ 2,900 kcal/);
+    click(w,'[data-pday="train"]');click(w,'[data-plan-all="train_kr"]');
+    st=Nu._state();const items=Object.values(st.days['2026-10-19']).flat();
+    assert.equal(Math.round(items.reduce((s,x)=>s+x.c*x.q,0)),630+2898);
+    Nu._setView(new Date().toISOString().slice(0,10));
+    const kg=w.document.getElementById('fw-kg');kg.value='77.4';click(w,'[data-act="weight"]');
+    assert.equal(w.Training.read().bw,77.5);
+  }finally{w.close();}
+  const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const weights={};for(let i=0;i<21;i++){const d=new Date();d.setDate(d.getDate()-i);weights[iso(d)]=76;}
+  const flat=boot({'bigthree500.nutrition.v1':{v:1,set:{ht:175,age:33,adj:0},days:{},weights,custom:[]}}),fw=flat.window;
+  try{
+    assert.match(fw.document.getElementById('pane-food').textContent,/체중이 거의 안 늘고 있어요/);
+    click(fw,'[data-act="adj"]');
+    assert.equal(fw.Nutrition.targets().train,3050);
+  }finally{fw.close();}
 });
