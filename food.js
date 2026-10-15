@@ -20,27 +20,31 @@ const dowOf=s=>(new Date(s+'T12:00:00').getDay()+6)%7;
 const label=s=>`${+s.slice(5,7)}.${+s.slice(8)} (${DOW[dowOf(s)]})`;
 
 /* ── 저장 ── */
-function blank(){return {v:1,set:{ht:175,age:33,adj:0,goal:76,cap:78},days:{},weights:{},custom:[]};}
-function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(d&&d.v===1){const b=blank();return {...b,...d,set:{...b.set,...(d.set||{})}};}}catch(e){}return blank();}
+/* 체중은 범위로 관리: 78~79kg 유지. 예전 '목표 76 · 상한 78' 설정은 버리고 새 범위로 바꾼다 */
+function blank(){return {v:1,set:{ht:175,age:33,adj:0,lo:78,hi:79},days:{},weights:{},custom:[]};}
+function fixSet(d){const b=blank(),st={...b.set,...(d.set||{})};if(!(d.set&&d.set.lo>0)){st.lo=b.set.lo;st.hi=b.set.hi;}delete st.goal;delete st.cap;return {...b,...d,set:st};}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(d&&d.v===1)return fixSet(d);}catch(e){}return blank();}
 let N=load(), view=todayISO(), planDay=null, slotPick=null, chosen=null, mult=1;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(N));return true;}catch(e){return false;}}
 
 /* ── 목표 ── */
 function weightAvg(end,days=7){const v=[];for(let i=0;i<days;i++){const w=N.weights[addDays(end,-i)];if(w)v.push(w);}return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;}
-function railBw(){const T=root.Training;return T?T.read().bw:76;}
+function railBw(){const T=root.Training;return T?T.read().bw:78;}
 function bw(){return weightAvg(todayISO())||railBw();}
 function bmr(){return 10*bw()+6.25*N.set.ht-5*N.set.age+5;}           /* Mifflin-St Jeor (남성) */
 function tdee(){return bmr()*1.55;}                                    /* 주 5회 웨이트 = 보통 활동 */
 const isTrain=s=>{const st=root.Training&&root.Training.state.start;if(st&&s<st)return false;return dowOf(s)<5;}; /* 월~금 훈련, 토·일·플랜 시작 전은 휴식 */
 const MODES={
-  cut: {label:'감량',  train:-200, rest:-450, prot:2.2, why:'목표 체중보다 무거워서 하루 평균 약 300kcal 적게 먹어요. 한 달에 1kg 정도 빠지는 속도라 근력은 지킬 수 있어요.'},
-  hold:{label:'유지',  train:+150, rest:-250, prot:2.0, why:'목표 체중 근처라 훈련일엔 조금 더, 쉬는 날엔 조금 덜 먹어서 일주일 합계를 유지 칼로리에 맞춰요. 체중은 그대로, 근육은 조금씩.'},
-  gain:{label:'증량',  train:+300, rest:0,    prot:2.0, why:'목표 체중보다 가벼워서 조금 남게 먹어요.'}
+  cut: {label:'감량',  train:-200, rest:-450, prot:2.2, why:'유지 범위보다 무거워서 하루 평균 약 270kcal 적게 먹어요. 한 달에 1kg 정도 빠지는 속도라 근력은 지킬 수 있어요. 범위 안으로 들어오면 자동으로 유지 모드.'},
+  hold:{label:'유지',  train:+150, rest:-250, prot:2.0, why:'유지 범위 안이라 훈련일엔 조금 더, 쉬는 날엔 조금 덜 먹어서 일주일 합계를 유지 칼로리에 맞춰요. 체중은 그대로, 힘만 올립니다.'},
+  gain:{label:'증량',  train:+300, rest:0,    prot:2.0, why:'유지 범위보다 가벼워서 훈련일에 300kcal 더 먹어요. 한 달에 0.5~1kg 붙는 속도. 범위에 들어오면 자동으로 유지 모드.'}
 };
-function mode(){const a=bw(),g=N.set.goal||76,c=N.set.cap||78;if(a>=c-0.3||a>g+0.5)return 'cut';if(a<g-0.5)return 'gain';return 'hold';}
+const RANGE=()=>({lo:N.set.lo||78,hi:N.set.hi||79});
+/* 7일 평균이 범위 위면 감량, 아래면 증량, 안이면 유지 */
+function mode(){const a=bw(),{lo,hi}=RANGE();if(a>hi)return 'cut';if(a<lo)return 'gain';return 'hold';}
 function kcalTarget(s){const m=MODES[mode()];return Math.round((tdee()+(isTrain(s)?m.train:m.rest)+(N.set.adj||0))/50)*50;}
 function proteinTarget(){return Math.round(bw()*MODES[mode()].prot);}
-function targets(){return {train:kcalTarget('2026-10-19'),rest:kcalTarget('2026-10-24'),protein:proteinTarget(),tdee:Math.round(tdee()),bmr:Math.round(bmr()),mode:mode(),goal:N.set.goal||76,cap:N.set.cap||78};}
+function targets(){return {train:kcalTarget('2026-10-19'),rest:kcalTarget('2026-10-24'),protein:proteinTarget(),tdee:Math.round(tdee()),bmr:Math.round(bmr()),mode:mode(),...RANGE()};}
 
 /* ── 기록 ── */
 function dayOf(s,create){if(!N.days[s]&&create)N.days[s]={breakfast:[],lunch:[],snack:[],dinner:[]};return N.days[s];}
@@ -71,21 +75,21 @@ function addPlanMeal(pl,slot){(pl.meals[slot]||[]).forEach(([n,q])=>addItem(view
 /* ── 체중 추세: 최근 7일 평균 vs 2주 전 7일 평균 → 한 달 변화량 ── */
 function trend(){const t=todayISO(),now=weightAvg(t),then=weightAvg(addDays(t,-14));const n=Object.keys(N.weights).filter(k=>k>addDays(t,-21)&&k<=t).length;if(!now||!then||n<10)return null;return (now-then)/14*30;}
 
-/* ── 체중 그래프: 최근 30일, 목표선과 상한선 ── */
+/* ── 체중 그래프: 최근 30일, 유지 범위(띠) ── */
 function weightChart(){
   const t=todayISO(),days=[...Array(30)].map((_,i)=>addDays(t,-29+i));
   const pts=days.map((s,i)=>[i,N.weights[s]]).filter(p=>p[1]);
-  const g=N.set.goal||76,c=N.set.cap||78;
+  const {lo:g,hi:c}=RANGE();
   const vals=pts.map(p=>p[1]).concat([g,c]);
   const lo=Math.floor(Math.min(...vals)-0.5),hi=Math.ceil(Math.max(...vals)+0.5);
   const W=600,H=170,px=i=>14+i*(W-28)/29,py=v=>12+(hi-v)*(H-34)/(hi-lo);
   const line=pts.map((p,i)=>(i?'L':'M')+px(p[0]).toFixed(1)+' '+py(p[1]).toFixed(1)).join(' ');
   return `<svg class="wchart" viewBox="0 0 ${W} ${H}" role="img" aria-label="최근 30일 체중">
-    <rect x="14" y="${py(c)}" width="${W-28}" height="${Math.max(0,py(lo)-py(c))}" fill="none"/>
-    <line x1="14" x2="${W-14}" y1="${py(c)}" y2="${py(c)}" class="wcap"/><text x="${W-14}" y="${py(c)-5}" text-anchor="end" class="wlab cap">상한 ${c}kg</text>
-    <line x1="14" x2="${W-14}" y1="${py(g)}" y2="${py(g)}" class="wgoal"/><text x="${W-14}" y="${py(g)-5}" text-anchor="end" class="wlab goal">목표 ${g}kg</text>
+    <rect x="14" y="${py(c)}" width="${W-28}" height="${Math.max(0,py(g)-py(c))}" class="wband"/>
+    <line x1="14" x2="${W-14}" y1="${py(c)}" y2="${py(c)}" class="wgoal"/><text x="${W-14}" y="${py(c)-5}" text-anchor="end" class="wlab goal">${c}kg</text>
+    <line x1="14" x2="${W-14}" y1="${py(g)}" y2="${py(g)}" class="wgoal"/><text x="${W-14}" y="${py(g)+14}" text-anchor="end" class="wlab goal">${g}kg</text>
     ${pts.length>1?`<path d="${line}" class="wline"/>`:''}
-    ${pts.map(p=>`<circle cx="${px(p[0]).toFixed(1)}" cy="${py(p[1]).toFixed(1)}" r="3.2" class="wdot${p[1]>=c?' over':''}"/>`).join('')}
+    ${pts.map(p=>`<circle cx="${px(p[0]).toFixed(1)}" cy="${py(p[1]).toFixed(1)}" r="3.2" class="wdot${p[1]>c?' over':p[1]<g?' under':''}"/>`).join('')}
     <text x="14" y="${H-4}" class="wlab">${+days[0].slice(5,7)}.${+days[0].slice(8)}</text><text x="${W-14}" y="${H-4}" text-anchor="end" class="wlab">오늘</text>
   </svg>${pts.length?'':'<p class="fnote">아침 체중을 기록하면 여기 선이 그려져요.</p>'}`;
 }
@@ -97,7 +101,7 @@ function render(){
   const tg=kcalTarget(view),pt=proteinTarget(),tot=totals(view),d=N.days[view]||{},train=isTrain(view);
   const left=tg-tot.c,pleft=pt-tot.p;
   if(planDay===null)planDay=train?'train':'rest';
-  const tr=trend(),avg=weightAvg(todayISO()),md=mode(),g=N.set.goal||76,cap=N.set.cap||78,now=bw();
+  const tr=trend(),avg=weightAvg(todayISO()),md=mode(),{lo,hi}=RANGE(),now=bw();
   const recent=[...Array(14)].map((_,i)=>addDays(todayISO(),-13+i));
   host.innerHTML=`
   <section class="sec food-hero">
@@ -134,9 +138,9 @@ function render(){
   </section>
 
   <section class="sec">
-    <div class="eyebrow">체중 관리 · 상한 ${cap}kg</div>
-    <h2>${md==='cut'?`${g}kg까지 ${(now-g).toFixed(1)}kg — 천천히 뺍니다.`:md==='gain'?`${g}kg까지 ${(g-now).toFixed(1)}kg 더.`:`${g}kg 근처를 지킵니다.`}</h2>
-    ${now>=cap-0.3?`<div class="banner"><b>상한 ${cap}kg에 닿았어요.</b> 목표 체중으로 내려올 때까지 감량 모드로 고정합니다.</div>`:''}
+    <div class="eyebrow">체중 관리 · ${lo}~${hi}kg 유지</div>
+    <h2>${md==='cut'?`${hi}kg까지 ${(now-hi).toFixed(1)}kg — 천천히 뺍니다.`:md==='gain'?`${lo}kg까지 ${(lo-now).toFixed(1)}kg — 조금 더 먹어요.`:`${lo}~${hi}kg 안이에요. 이대로 지킵니다.`}</h2>
+    ${md==='cut'?`<div class="banner"><b>${hi}kg을 넘었어요.</b> 7일 평균이 ${hi}kg 아래로 내려올 때까지 감량 모드입니다.</div>`:''}
     <div class="fweight">
       <label>${label(view)} 아침 공복 <input id="fw-kg" type="number" step="0.1" min="30" max="200" inputmode="decimal" value="${N.weights[view]??''}" placeholder="${railBw()}"> kg</label>
       <button class="primary" data-act="weight">저장</button>
@@ -144,8 +148,8 @@ function render(){
     <div class="wstats">
       <div><span>7일 평균</span><b>${avg?avg.toFixed(1)+'kg':'—'}</b></div>
       <div><span>한 달 변화</span><b>${tr===null?'기록 2주 필요':(tr>0?'+':'')+tr.toFixed(1)+'kg'}</b></div>
-      <div><span>목표 · 상한</span><b>${g} · ${cap}kg</b></div>
-      <div><span>예상</span><b>${md==='cut'&&tr!==null&&tr<-0.1?`약 ${Math.max(1,Math.round((now-g)/(-tr)*4.3))}주 뒤 ${g}kg`:md==='cut'?'한 달에 약 1kg':'유지'}</b></div>
+      <div><span>유지 범위</span><b>${lo}~${hi}kg</b></div>
+      <div><span>예상</span><b>${md==='cut'&&tr!==null&&tr<-0.1?`약 ${Math.max(1,Math.round((now-hi)/(-tr)*4.3))}주 뒤 ${hi}kg`:md==='gain'&&tr!==null&&tr>0.1?`약 ${Math.max(1,Math.round((lo-now)/tr*4.3))}주 뒤 ${lo}kg`:md==='cut'?'한 달에 약 −1kg':md==='gain'?'한 달에 약 +0.5~1kg':'범위 유지'}</b></div>
     </div>
     ${weightChart()}
     <div class="frecent">${recent.map(s=>{const t=totals(s),w=N.weights[s],tg2=kcalTarget(s);const has=t.c>0;const ok=has&&t.c>=tg2*0.9&&t.c<=tg2*1.1,pok=t.p>=proteinTarget();
@@ -154,8 +158,8 @@ function render(){
   </section>
 
   <details class="sec fset"><summary>내 정보 · 계산 방식</summary>
-    <div class="fweight"><label>키 <input id="fs-ht" type="number" min="140" max="220" value="${N.set.ht}"> cm</label><label>나이 <input id="fs-age" type="number" min="15" max="90" value="${N.set.age}"> 세</label><label>목표 체중 <input id="fs-goal" type="number" step="0.5" min="40" max="150" value="${g}"> kg</label><label>상한 <input id="fs-cap" type="number" step="0.5" min="40" max="160" value="${cap}"> kg</label><button class="ghost" data-act="set">저장</button></div>
-    <p class="fnote">기초대사 ${num(bmr())} kcal (Mifflin-St Jeor) × 1.55(주 5회 웨이트) = 유지 ${num(tdee())} kcal. 체중은 7일 평균, 기록이 없으면 왼쪽 체중 칸 값. 모드: 7일 평균이 목표+0.5kg보다 무겁거나 상한−0.3kg에 닿으면 감량, 목표±0.5kg이면 유지, 목표−0.5kg보다 가벼우면 증량. 직접 조정값 ${N.set.adj>0?'+':''}${N.set.adj||0} kcal <button class="ghost" data-act="adj" data-v="-100">−100</button> <button class="ghost" data-act="adj" data-v="100">+100</button>${N.set.adj?' <button class="ghost" data-act="adj0">초기화</button>':''}.</p>
+    <div class="fweight"><label>키 <input id="fs-ht" type="number" min="140" max="220" value="${N.set.ht}"> cm</label><label>나이 <input id="fs-age" type="number" min="15" max="90" value="${N.set.age}"> 세</label><label>유지 범위 <input id="fs-lo" type="number" step="0.5" min="40" max="150" value="${lo}"> ~ <input id="fs-hi" type="number" step="0.5" min="40" max="160" value="${hi}"> kg</label><button class="ghost" data-act="set">저장</button></div>
+    <p class="fnote">기초대사 ${num(bmr())} kcal (Mifflin-St Jeor) × 1.55(주 5회 웨이트) = 유지 ${num(tdee())} kcal. 체중은 7일 평균, 기록이 없으면 왼쪽 체중 칸 값. 모드: 7일 평균이 ${hi}kg보다 무거우면 감량, ${lo}kg보다 가벼우면 증량, 그 사이면 유지. 직접 조정값 ${N.set.adj>0?'+':''}${N.set.adj||0} kcal <button class="ghost" data-act="adj" data-v="-100">−100</button> <button class="ghost" data-act="adj" data-v="100">+100</button>${N.set.adj?' <button class="ghost" data-act="adj0">초기화</button>':''}.</p>
     <div class="fweight"><button class="ghost" data-act="export">식단 기록 백업</button><label class="ghost fimport">백업 불러오기 <input id="fs-import" type="file" accept="application/json" hidden></label></div>
   </details>`;
   const T=root.Training;if(T&&$('fCalHi')){const t2=targets();$('fCalHi').textContent=num(t2.train);$('fCalLo').textContent=num(t2.rest);$('fProtein').textContent=t2.protein+' g';}
@@ -203,7 +207,7 @@ document.addEventListener('click',e=>{
     const T=root.Training,a=weightAvg(todayISO());if(T&&a){T.inputs.bw.value=Math.round(a*2)/2;T.render();}render();}
   else if(t.dataset.act==='adj'){N.set.adj=(N.set.adj||0)+(+t.dataset.v);save();render();}
   else if(t.dataset.act==='adj0'){N.set.adj=0;save();render();}
-  else if(t.dataset.act==='set'){const ht=+$('fs-ht').value,age=+$('fs-age').value,go=+$('fs-goal').value,cp=+$('fs-cap').value;if(ht>=140&&ht<=220)N.set.ht=ht;if(age>=15&&age<=90)N.set.age=age;if(go>=40&&go<=150)N.set.goal=go;if(cp>=40&&cp<=160&&cp>(N.set.goal||76))N.set.cap=cp;save();render();const T=root.Training;if(T)T.render();}
+  else if(t.dataset.act==='set'){const ht=+$('fs-ht').value,age=+$('fs-age').value,lo2=+$('fs-lo').value,hi2=+$('fs-hi').value;if(ht>=140&&ht<=220)N.set.ht=ht;if(age>=15&&age<=90)N.set.age=age;if(lo2>=40&&hi2<=160&&hi2>lo2){N.set.lo=lo2;N.set.hi=hi2;}save();render();const T=root.Training;if(T)T.render();}
   else if(t.dataset.act==='export'){const b=new Blob([JSON.stringify(N,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`3대500-식단-${todayISO()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 });
 document.addEventListener('input',e=>{
@@ -212,7 +216,7 @@ document.addEventListener('input',e=>{
 });
 document.addEventListener('change',e=>{
   if(e.target.id!=='fs-import'||!e.target.files[0])return;
-  e.target.files[0].text().then(txt=>{try{const d=JSON.parse(txt);if(d&&d.v===1&&d.days){N={...blank(),...d};save();render();}}catch(err){}});
+  e.target.files[0].text().then(txt=>{try{const d=JSON.parse(txt);if(d&&d.v===1&&d.days){N=fixSet(d);save();render();}}catch(err){}});
 });
 document.addEventListener('training-render',render);
 

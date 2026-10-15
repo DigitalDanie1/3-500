@@ -226,6 +226,8 @@ dialog .primary{width:100%;margin-top:20px}
 .wline{fill:none;stroke:var(--ink);stroke-width:2}
 .wdot{fill:var(--ink)}
 .wdot.over{fill:var(--p25)}
+.wdot.under{fill:var(--p10)}
+.wband{fill:var(--p10);opacity:.12}
 .wgoal{stroke:var(--p10);stroke-width:1.5;stroke-dasharray:5 4}
 .wcap{stroke:var(--p25);stroke-width:1.5}
 .wlab{font-family:var(--f-mono);font-size:11px;fill:var(--faint)}
@@ -238,6 +240,14 @@ dialog .primary{width:100%;margin-top:20px}
 .vjump a{padding:7px 12px;border:1px solid var(--line-strong);border-radius:3px;text-decoration:none;color:var(--ink);font-size:13.5px;font-weight:600}
 .vjump a small{font-family:var(--f-mono);font-size:10px;color:var(--faint);margin-left:4px;font-weight:400}
 .vjump a:hover{border-color:var(--accent)}
+.vjump a.done{color:var(--faint)}
+.vjump a.done small::after{content:' \2713'}
+.vjg{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;align-items:start;margin-top:12px}
+.vjg>span{font-size:12px;font-weight:700;color:var(--muted);padding-top:9px}
+.vjg .vjump{margin-top:0}
+.vnew{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-size:14px;font-weight:600;cursor:pointer}
+.vonly-new .vcard.seen{display:none}
+@media (max-width:640px){.vjg{grid-template-columns:1fr;gap:6px}.vjg>span{padding-top:0}}
 .vsub{margin-top:-4px}
 .vgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:12px}
 .vcard{border:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;min-width:0}

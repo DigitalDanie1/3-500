@@ -68,10 +68,10 @@ test('AMRAP last set raises the baseline, flags missed minimums, and skips deloa
 });
 
 test('식단: 유지 모드 목표, 음식 담기, 목표에 맞춘 추천 식단, 체중으로 레일 갱신',()=>{
-  const dom=boot({'bigthree500.v1':{sq:140,bp:105,dl:135,ohp:65,bw:76}}),w=dom.window;
+  const dom=boot({'bigthree500.v1':{sq:140,bp:105,dl:135,ohp:65,bw:78.5}}),w=dom.window;
   try{
     const Nu=w.Nutrition;
-    assert.deepEqual({...Nu.targets()},{train:2800,rest:2400,protein:152,tdee:2625,bmr:1694,mode:'hold',goal:76,cap:78});
+    assert.deepEqual({...Nu.targets()},{train:2800,rest:2400,protein:157,tdee:2664,bmr:1719,mode:'hold',lo:78,hi:79});
     assert.equal(w.document.getElementById('fCalHi').textContent,'2,800');
     Nu._setView('2026-10-19');
     click(w,'[data-add="lunch"]');
@@ -88,26 +88,33 @@ test('식단: 유지 모드 목표, 음식 담기, 목표에 맞춘 추천 식�
     assert.equal(w.Training.read().bw,77.5);
   }finally{w.close();}
 });
-test('체중 관리: 상한에 닿으면 감량 모드, 목표보다 가벼우면 증량, 식단도 따라 줄어듦',()=>{
+test('체중 관리: 78~79kg 유지 — 79 넘으면 감량, 78 밑이면 증량, 예전 76/78 설정은 새 범위로',()=>{
   const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   const series=kg=>{const o={};for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);o[iso(d)]=kg;}return o;};
-  const heavy=boot({'bigthree500.nutrition.v1':{v:1,set:{ht:175,age:33,adj:0,goal:76,cap:78},days:{},weights:series(78),custom:[]}}),hw=heavy.window;
+  const old=kg=>({'bigthree500.nutrition.v1':{v:1,set:{ht:175,age:33,adj:0,goal:76,cap:78},days:{},weights:series(kg),custom:[]}});
+  const heavy=boot(old(80)),hw=heavy.window;
   try{
     const t=hw.Nutrition.targets();
-    assert.equal(t.mode,'cut');assert.equal(t.train,2450);assert.equal(t.rest,2200);assert.equal(t.protein,172);
-    assert.match(hw.document.getElementById('pane-food').textContent,/상한 78kg에 닿았어요/);
-    assert.ok(Math.abs(hw.Nutrition.planFor('rest_sg').c-2200)<130);
+    assert.equal(t.lo,78);assert.equal(t.hi,79);
+    assert.equal(t.mode,'cut');assert.equal(t.train,2500);assert.equal(t.rest,2250);assert.equal(t.protein,176);
+    assert.match(hw.document.getElementById('pane-food').textContent,/79kg을 넘었어요/);
+    assert.ok(Math.abs(hw.Nutrition.planFor('rest_sg').c-2250)<130);
+    assert.ok(!('goal' in hw.Nutrition._state().set));
   }finally{hw.close();}
-  const light=boot({'bigthree500.nutrition.v1':{v:1,set:{ht:175,age:33,adj:0,goal:76,cap:78},days:{},weights:series(74),custom:[]}}),lw=light.window;
-  try{ assert.equal(lw.Nutrition.targets().mode,'gain'); }finally{lw.close();}
+  const mid=boot(old(78.5)),mw=mid.window;
+  try{ assert.equal(mw.Nutrition.targets().mode,'hold');assert.match(mw.document.getElementById('pane-food').textContent,/78~79kg 안이에요/); }finally{mw.close();}
+  const light=boot(old(76)),lw=light.window;
+  try{ assert.equal(lw.Nutrition.targets().mode,'gain');assert.match(lw.document.getElementById('pane-food').textContent,/78kg까지 2\.0kg/); }finally{lw.close();}
 });
 
 test('영상 탭: 데드·스쿼트 먼저, 썸네일 누르면 그 자리 재생, 봤음 저장, 동작 가이드에서 바로 이동',()=>{
   const dom=boot(),w=dom.window,d=w.document;
   try{
     const secs=[...d.querySelectorAll('#pane-video section[id^="vs-"]')].map(s=>s.id);
-    assert.deepEqual(secs.slice(0,2),['vs-deadlift','vs-squat']);
-    assert.equal(d.querySelectorAll('#pane-video .vcard').length,28);
+    assert.deepEqual(secs.slice(0,4),['vs-deadlift','vs-grip','vs-squat','vs-squatpr']);
+    assert.ok(secs.includes('vs-back')&&secs.includes('vs-shoulder')&&secs.includes('vs-chest')&&secs.includes('vs-weight'));
+    assert.equal(d.querySelectorAll('#pane-video .vcard').length,93);
+    const ids=[...d.querySelectorAll('#pane-video .vcard')].map(c=>c.id);assert.equal(new Set(ids).size,93);
     const first=d.querySelector('#vs-deadlift [data-play]'),id=first.dataset.play;
     first.click();
     assert.ok(d.querySelector(`#v-${id} iframe`).src.includes('youtube-nocookie.com/embed/'+id));
@@ -116,5 +123,9 @@ test('영상 탭: 데드·스쿼트 먼저, 썸네일 누르면 그 자리 재�
     assert.match(d.getElementById('guide-body').innerHTML,/data-video-sec="deadlift"/);
     click(w,'#guide-body [data-video-sec="deadlift"]');
     assert.equal(d.getElementById('pane-video').hidden,false);
+    const nv=d.getElementById('v-onlynew');nv.checked=true;nv.dispatchEvent(new w.Event('change',{bubbles:true}));
+    assert.ok(d.getElementById('pane-video').classList.contains('vonly-new'));
+    assert.ok(d.getElementById('v-'+id).classList.contains('seen'));
+    for(const [n,sec] of [['랫풀다운','back'],['사이드 레터럴 레이즈','shoulder'],['인클라인 덤벨 프레스','chest'],['인클라인 덤벨 컬',null],['포즈 / 스포토 벤치','bench'],['불가리안 스플릿 스쿼트',null]])assert.equal(w.Videos.secFor(n),sec,n);
   }finally{w.close();}
 });

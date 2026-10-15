@@ -10,10 +10,10 @@
   ];
 
   var PHASES = [
-    {lab:'페이즈 1', sub:'2027.04 · ≤78kg', sq:152.5, bp:110,   dl:155, bw:76},
-    {lab:'페이즈 2', sub:'2027.10 · ≤78kg', sq:162.5, bp:115,   dl:170, bw:76.5},
-    {lab:'페이즈 3', sub:'2028.04 · ≤78kg', sq:172.5, bp:117.5, dl:185, bw:77},
-    {lab:'페이즈 4', sub:'2028.10 · ≤78kg', sq:180,   bp:120,   dl:200, bw:77}
+    {lab:'페이즈 1', sub:'2027.04 · 78~79kg', sq:152.5, bp:110,   dl:155, bw:78.5},
+    {lab:'페이즈 2', sub:'2027.10 · 78~79kg', sq:162.5, bp:115,   dl:170, bw:78.5},
+    {lab:'페이즈 3', sub:'2028.04 · 78~79kg', sq:172.5, bp:117.5, dl:185, bw:78.5},
+    {lab:'페이즈 4', sub:'2028.10 · 78~79kg', sq:180,   bp:120,   dl:200, bw:78.5}
   ];
 
   /* 5/3/1 — 퍼센트는 1RM이 아니라 기준값(TM = 1RM × 90%) 대비.
@@ -34,7 +34,7 @@
   var $ = function(id){ return document.getElementById(id); };
   var inputs = {sq:$('iSq'), bp:$('iBp'), dl:$('iDl'), ohp:$('iOhp'), bw:$('iBw')};
 
-  function GOALW(){ return (window.Nutrition && window.Nutrition.targets().goal) || 76; }
+  function GOALW(){ return (window.Nutrition && window.Nutrition.targets().hi) || 79; }   /* 유지 범위 위쪽(79kg) 기준 */
   function r25(x){ return Math.round(x/2.5)*2.5; }
   function fmt(x){ return (Math.round(x*100)/100).toString(); }
 
@@ -58,7 +58,7 @@
     var v = {};
     ['sq','bp','dl','ohp','bw'].forEach(function(k){
       var n = inputs[k] ? parseFloat(inputs[k].value) : NaN;
-      if (!isFinite(n) || n <= 0) n = k==='bw' ? 76 : LIFTS.filter(function(l){return l.k===k;})[0].def;
+      if (!isFinite(n) || n <= 0) n = k==='bw' ? 78 : LIFTS.filter(function(l){return l.k===k;})[0].def;
       v[k] = n;
     });
     return v;
