@@ -232,3 +232,28 @@ dialog .primary{width:100%;margin-top:20px}
 .wlab.goal{fill:var(--p10)}
 .wlab.cap{fill:var(--p25)}
 @media (max-width:940px){.wstats{grid-template-columns:repeat(2,1fr)}}
+
+/* ── 영상 탭 ── */
+.vjump{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.vjump a{padding:7px 12px;border:1px solid var(--line-strong);border-radius:3px;text-decoration:none;color:var(--ink);font-size:13.5px;font-weight:600}
+.vjump a small{font-family:var(--f-mono);font-size:10px;color:var(--faint);margin-left:4px;font-weight:400}
+.vjump a:hover{border-color:var(--accent)}
+.vsub{margin-top:-4px}
+.vgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:12px}
+.vcard{border:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;min-width:0}
+.vcard.seen{opacity:.72}
+.vthumb{appearance:none;border:0;padding:0;margin:0;position:relative;display:block;width:100%;aspect-ratio:16/9;background:#000;cursor:pointer;overflow:hidden}
+.vthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.vplay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:54px;height:38px;border-radius:9px;background:rgba(200,16,46,.92);color:#fff;display:grid;place-items:center;font-size:16px}
+.vthumb:hover .vplay{background:#E1112F}
+.ven{position:absolute;right:8px;top:8px;font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;background:rgba(0,0,0,.72);color:#fff;padding:3px 6px;border-radius:2px}
+.vframe{position:relative;width:100%;aspect-ratio:16/9;background:#000}
+.vframe iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vmeta{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px}
+.vwhy{margin:0;font-size:13.5px;font-weight:600;color:var(--ink);max-width:none}
+.vt{margin:0;font-family:var(--f-body);font-weight:500;font-size:13px;line-height:1.45;color:var(--muted)}
+.vch{font-family:var(--f-mono);font-size:10.5px;color:var(--faint)}
+.vact{display:flex;align-items:center;gap:14px;margin-top:4px;font-size:12.5px}
+.vact a{color:var(--muted);margin-left:auto}
+.vseen{display:flex;align-items:center;gap:5px;color:var(--muted);cursor:pointer}
+@media (max-width:940px){.vgrid{grid-template-columns:1fr}}

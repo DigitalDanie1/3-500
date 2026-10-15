@@ -2,7 +2,7 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 const C=require('../core.js');
 const {JSDOM}=require('jsdom');
 const dir=path.join(__dirname,'..');
-function boot(storage={}){const dom=new JSDOM(fs.readFileSync(path.join(dir,'index.html'),'utf8'),{url:'https://example.test',runScripts:'outside-only'});const w=dom.window;w.HTMLElement.prototype.scrollIntoView=function(){};w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};for(const [k,v] of Object.entries(storage))w.localStorage.setItem(k,JSON.stringify(v));for(const file of ['core.js','guides.js','legacy.js','app.js','food.js'])w.eval(fs.readFileSync(path.join(dir,file),'utf8'));return dom;}
+function boot(storage={}){const dom=new JSDOM(fs.readFileSync(path.join(dir,'index.html'),'utf8'),{url:'https://example.test',runScripts:'outside-only'});const w=dom.window;w.HTMLElement.prototype.scrollIntoView=function(){};w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};for(const [k,v] of Object.entries(storage))w.localStorage.setItem(k,JSON.stringify(v));for(const file of ['core.js','guides.js','legacy.js','app.js','food.js','videos.js'])w.eval(fs.readFileSync(path.join(dir,file),'utf8'));return dom;}
 function click(w,s){const el=w.document.querySelector(s);assert.ok(el,'Missing '+s);el.click();}
 function change(w,s,value){const el=w.document.querySelector(s);assert.ok(el,'Missing '+s);el.value=value;el.dispatchEvent(new w.Event('change',{bubbles:true}));}
 test('warmups stay below work, use loadable steps and handle light bars',()=>{assert.deepEqual(C.warmup(90).map(x=>[x.kg,x.reps]),[[20,8],[35,5],[52.5,3],[70,1]]);assert.deepEqual(C.warmup(20),[]);for(const bar of [15,20])for(let kg=bar;kg<=300;kg+=2.5){const r=C.warmup(kg,bar);assert.ok(r.every((x,i)=>x.kg<kg&&x.kg>=bar&&x.kg%2.5===0&&(!i||x.kg>r[i-1].kg)));}assert.equal(C.warmup(112.5,20,true)[0].kg,40);});
@@ -100,4 +100,21 @@ test('체중 관리: 상한에 닿으면 감량 모드, 목표보다 가벼우�
   }finally{hw.close();}
   const light=boot({'bigthree500.nutrition.v1':{v:1,set:{ht:175,age:33,adj:0,goal:76,cap:78},days:{},weights:series(74),custom:[]}}),lw=light.window;
   try{ assert.equal(lw.Nutrition.targets().mode,'gain'); }finally{lw.close();}
+});
+
+test('영상 탭: 데드·스쿼트 먼저, 썸네일 누르면 그 자리 재생, 봤음 저장, 동작 가이드에서 바로 이동',()=>{
+  const dom=boot(),w=dom.window,d=w.document;
+  try{
+    const secs=[...d.querySelectorAll('#pane-video section[id^="vs-"]')].map(s=>s.id);
+    assert.deepEqual(secs.slice(0,2),['vs-deadlift','vs-squat']);
+    assert.equal(d.querySelectorAll('#pane-video .vcard').length,28);
+    const first=d.querySelector('#vs-deadlift [data-play]'),id=first.dataset.play;
+    first.click();
+    assert.ok(d.querySelector(`#v-${id} iframe`).src.includes('youtube-nocookie.com/embed/'+id));
+    assert.equal(JSON.parse(w.localStorage.getItem('bigthree500.watched.v1'))[id],1);
+    click(w,'[data-guide="데드리프트"]');
+    assert.match(d.getElementById('guide-body').innerHTML,/data-video-sec="deadlift"/);
+    click(w,'#guide-body [data-video-sec="deadlift"]');
+    assert.equal(d.getElementById('pane-video').hidden,false);
+  }finally{w.close();}
 });

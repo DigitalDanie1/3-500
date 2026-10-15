@@ -906,6 +906,7 @@
 
     var tabs = [{b:$('tabPlan'), p:$('pane-plan')}, {b:$('tabWeek'), p:$('pane-week')}];
     if ($('tabFood') && $('pane-food')) tabs.push({b:$('tabFood'), p:$('pane-food')});
+    if ($('tabVideo') && $('pane-video')) tabs.push({b:$('tabVideo'), p:$('pane-video')});
     function select(i){
       tabs.forEach(function(t, j){
         t.b.setAttribute('aria-selected', i === j ? 'true' : 'false');

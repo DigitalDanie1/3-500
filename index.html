@@ -630,6 +630,7 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
       <button class="tab" id="tabPlan" role="tab" aria-selected="true" aria-controls="pane-plan">로드맵</button>
       <button class="tab" id="tabWeek" role="tab" aria-selected="false" aria-controls="pane-week">주간 실행</button>
       <button class="tab" id="tabFood" role="tab" aria-selected="false" aria-controls="pane-food">식단</button>
+      <button class="tab" id="tabVideo" role="tab" aria-selected="false" aria-controls="pane-video">영상</button>
     </nav>
 
     <div class="pane" id="pane-plan" role="tabpanel" aria-labelledby="tabPlan">
@@ -970,6 +971,7 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
     </div>
 
     <div class="pane" id="pane-food" role="tabpanel" aria-labelledby="tabFood" hidden></div>
+    <div class="pane" id="pane-video" role="tabpanel" aria-labelledby="tabVideo" hidden></div>
 
     <p id="save-status" class="save-status" role="status">기록은 이 기기의 브라우저에 저장됩니다.</p>
     <footer>
@@ -984,7 +986,7 @@ footer .sig{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-tr
 
 
 
-<script src="core.js"></script><script src="guides.js"></script><script src="legacy.js"></script><script src="app.js"></script><script src="food.js"></script>
+<script src="core.js"></script><script src="guides.js"></script><script src="legacy.js"></script><script src="app.js"></script><script src="food.js"></script><script src="videos.js"></script>
 <dialog id="guide-dialog" aria-labelledby="guide-title"><div id="guide-body"></div><form method="dialog"><button class="primary">닫기</button></form></dialog>
 <div id="rest-timer" class="rest-timer" hidden></div>
 <dialog id="food-dialog" aria-labelledby="fd-title"><div class="fd-body">
