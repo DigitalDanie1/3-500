@@ -10,10 +10,10 @@
   ];
 
   var PHASES = [
-    {lab:'페이즈 1', sub:'2027.04 · 79kg', sq:152.5, bp:110,   dl:155, bw:79},
-    {lab:'페이즈 2', sub:'2027.10 · 81kg', sq:162.5, bp:115,   dl:170, bw:81},
-    {lab:'페이즈 3', sub:'2028.04 · 83kg', sq:172.5, bp:117.5, dl:185, bw:83},
-    {lab:'페이즈 4', sub:'2028.10 · 84kg', sq:180,   bp:120,   dl:200, bw:84}
+    {lab:'페이즈 1', sub:'2027.04 · ≤78kg', sq:152.5, bp:110,   dl:155, bw:76},
+    {lab:'페이즈 2', sub:'2027.10 · ≤78kg', sq:162.5, bp:115,   dl:170, bw:76.5},
+    {lab:'페이즈 3', sub:'2028.04 · ≤78kg', sq:172.5, bp:117.5, dl:185, bw:77},
+    {lab:'페이즈 4', sub:'2028.10 · ≤78kg', sq:180,   bp:120,   dl:200, bw:77}
   ];
 
   /* 5/3/1 — 퍼센트는 1RM이 아니라 기준값(TM = 1RM × 90%) 대비.
@@ -34,6 +34,7 @@
   var $ = function(id){ return document.getElementById(id); };
   var inputs = {sq:$('iSq'), bp:$('iBp'), dl:$('iDl'), ohp:$('iOhp'), bw:$('iBw')};
 
+  function GOALW(){ return (window.Nutrition && window.Nutrition.targets().goal) || 76; }
   function r25(x){ return Math.round(x/2.5)*2.5; }
   function fmt(x){ return (Math.round(x*100)/100).toString(); }
 
@@ -100,7 +101,7 @@
         + '<td><span class="num">'+l.target+'</span></td>'
         + '<td><span class="delta">'+(l.target-now >= 0 ? '+' : '')+fmt(l.target-now)+'</span></td>'
         + '<td><span class="dim">'+(now/v.bw).toFixed(2)+'배</span></td>'
-        + '<td><span class="dim">'+(l.target/84).toFixed(2)+'배</span></td>'
+        + '<td><span class="dim">'+(l.target/GOALW()).toFixed(2)+'배</span></td>'
         + '</tr>';
     });
     rows += '<tr class="sum">'
@@ -109,7 +110,7 @@
       + '<td><span class="num">'+tTot+'</span></td>'
       + '<td><span class="delta">'+(tTot-total >= 0 ? '+' : '')+fmt(tTot-total)+'</span></td>'
       + '<td><span class="dim">'+(total/v.bw).toFixed(2)+'배</span></td>'
-      + '<td><span class="dim">'+(tTot/84).toFixed(2)+'배</span></td>'
+      + '<td><span class="dim">'+(tTot/GOALW()).toFixed(2)+'배</span></td>'
       + '</tr>';
     $('ledgerBody').innerHTML = rows;
 

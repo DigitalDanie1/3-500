@@ -67,31 +67,37 @@ test('AMRAP last set raises the baseline, flags missed minimums, and skips deloa
   }finally{rw.close();}
 });
 
-test('식단: 목표 계산, 음식 담기, 추천 식단, 체중으로 레일 갱신, 정체 시 +150 제안',()=>{
+test('식단: 유지 모드 목표, 음식 담기, 목표에 맞춘 추천 식단, 체중으로 레일 갱신',()=>{
   const dom=boot({'bigthree500.v1':{sq:140,bp:105,dl:135,ohp:65,bw:76}}),w=dom.window;
   try{
     const Nu=w.Nutrition;
-    assert.deepEqual({...Nu.targets()},{train:2900,rest:2550,protein:152,tdee:2625,bmr:1694});
-    assert.equal(w.document.getElementById('fCalHi').textContent,'2,900');
+    assert.deepEqual({...Nu.targets()},{train:2800,rest:2400,protein:152,tdee:2625,bmr:1694,mode:'hold',goal:76,cap:78});
+    assert.equal(w.document.getElementById('fCalHi').textContent,'2,800');
     Nu._setView('2026-10-19');
     click(w,'[data-add="lunch"]');
     assert.equal(w.document.getElementById('food-dialog').open,true);
     click(w,'[data-pick="치킨라이스"]');click(w,'[data-mult="1.5"]');click(w,'[data-act="confirm"]');
     let st=Nu._state();assert.equal(st.days['2026-10-19'].lunch[0].q,1.5);
-    assert.match(w.document.getElementById('pane-food').textContent,/630 \/ 2,900 kcal/);
+    assert.match(w.document.getElementById('pane-food').textContent,/630 \/ 2,800 kcal/);
+    const fitted=Nu.planFor('train_kr');assert.ok(Math.abs(fitted.c-2800)<90,'fitted '+fitted.c);
     click(w,'[data-pday="train"]');click(w,'[data-plan-all="train_kr"]');
     st=Nu._state();const items=Object.values(st.days['2026-10-19']).flat();
-    assert.equal(Math.round(items.reduce((s,x)=>s+x.c*x.q,0)),630+2898);
+    assert.equal(Math.round(items.reduce((s,x)=>s+x.c*x.q,0)),630+fitted.c);
     Nu._setView(new Date().toISOString().slice(0,10));
     const kg=w.document.getElementById('fw-kg');kg.value='77.4';click(w,'[data-act="weight"]');
     assert.equal(w.Training.read().bw,77.5);
   }finally{w.close();}
+});
+test('체중 관리: 상한에 닿으면 감량 모드, 목표보다 가벼우면 증량, 식단도 따라 줄어듦',()=>{
   const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  const weights={};for(let i=0;i<21;i++){const d=new Date();d.setDate(d.getDate()-i);weights[iso(d)]=76;}
-  const flat=boot({'bigthree500.nutrition.v1':{v:1,set:{ht:175,age:33,adj:0},days:{},weights,custom:[]}}),fw=flat.window;
+  const series=kg=>{const o={};for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);o[iso(d)]=kg;}return o;};
+  const heavy=boot({'bigthree500.nutrition.v1':{v:1,set:{ht:175,age:33,adj:0,goal:76,cap:78},days:{},weights:series(78),custom:[]}}),hw=heavy.window;
   try{
-    assert.match(fw.document.getElementById('pane-food').textContent,/체중이 거의 안 늘고 있어요/);
-    click(fw,'[data-act="adj"]');
-    assert.equal(fw.Nutrition.targets().train,3050);
-  }finally{fw.close();}
+    const t=hw.Nutrition.targets();
+    assert.equal(t.mode,'cut');assert.equal(t.train,2450);assert.equal(t.rest,2200);assert.equal(t.protein,172);
+    assert.match(hw.document.getElementById('pane-food').textContent,/상한 78kg에 닿았어요/);
+    assert.ok(Math.abs(hw.Nutrition.planFor('rest_sg').c-2200)<130);
+  }finally{hw.close();}
+  const light=boot({'bigthree500.nutrition.v1':{v:1,set:{ht:175,age:33,adj:0,goal:76,cap:78},days:{},weights:series(74),custom:[]}}),lw=light.window;
+  try{ assert.equal(lw.Nutrition.targets().mode,'gain'); }finally{lw.close();}
 });
